@@ -20,12 +20,15 @@ df = None
 csv_path = 'Internship_Research/TBM data.csv'
 
 if os.path.exists(csv_path):
-	# Essai avec séparateur virgule
-	df = pd.read_csv(csv_path, encoding='latin-1', sep=',')
-	print("Lecture du fichier CSV réussie (séparateur virgule).")
+	# Utilise la deuxième ligne comme en-tête (header=1), saute la première ligne
+	df = pd.read_csv(csv_path, encoding='latin-1', sep=',', header=1)
+	print("Lecture du fichier CSV réussie (séparateur virgule, header=1).")
 	print("Colonnes CSV :", list(df.columns))
 	print(df.head())
 	check_raw_data(df)
+	# Suppression des lignes avec au moins une valeur manquante
+	df = df.dropna()
+	print(f"Après suppression des lignes avec valeurs manquantes : {df.shape[0]} lignes restantes.")
 
 # 1. Gérer les valeurs manquantes (remplacement par la moyenne)
 df = df.fillna(df.mean(numeric_only=True))

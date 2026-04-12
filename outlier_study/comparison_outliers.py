@@ -2,6 +2,7 @@ import os
 import math
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import HuberRegressor, LinearRegression
@@ -22,6 +23,104 @@ TARGET_CANDIDATES = [
 
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+
+def save_table_png(df: pd.DataFrame, title: str, out_path: str, round_decimals: int = 4) -> None:
+    view = df.copy()
+    num_cols = view.select_dtypes(include=[np.number]).columns
+    view[num_cols] = view[num_cols].round(round_decimals)
+
+    n_rows, n_cols = view.shape
+    fig_w = max(12, n_cols * 1.8)
+    fig_h = max(2.8, n_rows * 0.55 + 1.6)
+
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    ax.axis("off")
+    ax.set_title(title, fontsize=12, pad=12)
+
+    table = ax.table(
+        cellText=view.values,
+        colLabels=view.columns,
+        loc="center",
+        cellLoc="center",
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 1.2)
+
+    for (row, col), cell in table.get_celld().items():
+        if row == 0:
+            cell.set_text_props(weight="bold")
+            cell.set_facecolor("#e9edf5")
+
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+def save_metric_bar_chart(
+    df: pd.DataFrame,
+    metric_col: str,
+    title: str,
+    out_path: str,
+    higher_is_better: bool,
+) -> None:
+    # Grouped bars: x=Dataset, one bar per model, with value labels.
+    order_dataset = ["D0_raw_no_drop_outliers", "D1_iqr_removed", "D2_winsorized_1_99"]
+    order_model = ["LinearRegression", "HuberRegressor", "RandomForest"]
+    model_colors = {
+        "LinearRegression": "#4c78a8",
+        "HuberRegressor": "#f58518",
+        "RandomForest": "#54a24b",
+    }
+
+    plot_df = df.copy()
+    plot_df = plot_df[plot_df["dataset"].isin(order_dataset) & plot_df["model"].isin(order_model)]
+
+    x = np.arange(len(order_dataset))
+    width = 0.24
+
+    fig, ax = plt.subplots(figsize=(12, 6.5))
+
+    for i, model in enumerate(order_model):
+        vals = []
+        for ds in order_dataset:
+            row = plot_df[(plot_df["dataset"] == ds) & (plot_df["model"] == model)]
+            vals.append(float(row[metric_col].iloc[0]) if not row.empty else np.nan)
+
+        bars = ax.bar(
+            x + (i - 1) * width,
+            vals,
+            width=width,
+            label=model,
+            color=model_colors[model],
+            alpha=0.9,
+        )
+
+        for bar, v in zip(bars, vals):
+            if np.isnan(v):
+                continue
+            y_offset = 0.01 if higher_is_better else 0.005
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + y_offset,
+                f"{v:.3f}",
+                ha="center",
+                va="bottom",
+                fontsize=8,
+            )
+
+    ax.set_title(title, fontsize=13, pad=12)
+    ax.set_xlabel("Dataset")
+    ax.set_ylabel(metric_col)
+    ax.set_xticks(x)
+    ax.set_xticklabels(order_dataset, rotation=10)
+    ax.legend(title="Model")
+    ax.grid(axis="y", linestyle="--", alpha=0.35)
+
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
 def normalize_col_name(name: str) -> str:
@@ -167,20 +266,91 @@ def main() -> None:
     overview_df = pd.DataFrame(dataset_overview)
     results_df = pd.DataFrame(all_results)
 
+    rename_map = {
+        "dataset": "Dataset",
+        "model": "Model",
+        "n_rows": "Rows",
+        "n_features": "Features",
+        "rows": "Rows",
+        "columns": "Columns",
+        "rows_removed_vs_d0": "Rows Removed vs D0",
+        "cv_mae_mean": "CV MAE (mean)",
+        "cv_mae_std": "CV MAE (std)",
+        "cv_rmse_mean": "CV RMSE (mean)",
+        "cv_rmse_std": "CV RMSE (std)",
+        "cv_r2_mean": "CV R2 (mean)",
+        "cv_r2_std": "CV R2 (std)",
+        "test_mae": "Test MAE",
+        "test_rmse": "Test RMSE",
+        "test_r2": "Test R2",
+    }
+
     overview_path = os.path.join(OUTPUT_DIR, "dataset_overview.csv")
     results_path = os.path.join(OUTPUT_DIR, "model_comparison_cv_test.csv")
 
-    overview_df.to_csv(overview_path, index=False)
-    results_df.to_csv(results_path, index=False)
+    overview_export = overview_df.rename(columns=rename_map)
+    results_export = results_df.rename(columns=rename_map)
+
+    overview_export.to_csv(overview_path, index=False)
+    results_export.to_csv(results_path, index=False)
 
     best_rows = results_df.sort_values(by=["cv_rmse_mean", "cv_mae_mean"]).groupby("dataset", as_index=False).first()
     best_path = os.path.join(OUTPUT_DIR, "best_model_per_dataset.csv")
-    best_rows.to_csv(best_path, index=False)
+    best_export = best_rows.rename(columns=rename_map)
+    best_export.to_csv(best_path, index=False)
+
+    # Save matplotlib table images for reporting.
+    overview_png = os.path.join(OUTPUT_DIR, "dataset_overview_table.png")
+    comparison_png = os.path.join(OUTPUT_DIR, "model_comparison_table.png")
+    best_png = os.path.join(OUTPUT_DIR, "best_model_per_dataset_table.png")
+
+    save_table_png(overview_export, "Dataset Overview", overview_png, round_decimals=0)
+
+    display_cols = [
+        "Dataset",
+        "Model",
+        "Rows",
+        "CV MAE (mean)",
+        "CV RMSE (mean)",
+        "CV R2 (mean)",
+        "Test MAE",
+        "Test RMSE",
+        "Test R2",
+    ]
+    comparison_display = results_export[display_cols].sort_values(by=["Dataset", "Model"]).reset_index(drop=True)
+    save_table_png(comparison_display, "Model Comparison (CV + Test)", comparison_png)
+
+    best_display = best_export[display_cols].sort_values(by=["Dataset", "Model"]).reset_index(drop=True)
+    save_table_png(best_display, "Best Model per Dataset", best_png)
+
+    # Save score charts with values displayed on bars.
+    rmse_cv_png = os.path.join(OUTPUT_DIR, "score_cv_rmse_bar.png")
+    rmse_test_png = os.path.join(OUTPUT_DIR, "score_test_rmse_bar.png")
+    mae_cv_png = os.path.join(OUTPUT_DIR, "score_cv_mae_bar.png")
+    mae_test_png = os.path.join(OUTPUT_DIR, "score_test_mae_bar.png")
+    r2_cv_png = os.path.join(OUTPUT_DIR, "score_cv_r2_bar.png")
+    r2_test_png = os.path.join(OUTPUT_DIR, "score_test_r2_bar.png")
+
+    save_metric_bar_chart(results_df, "cv_rmse_mean", "CV RMSE by Dataset and Model", rmse_cv_png, higher_is_better=False)
+    save_metric_bar_chart(results_df, "test_rmse", "Test RMSE by Dataset and Model", rmse_test_png, higher_is_better=False)
+    save_metric_bar_chart(results_df, "cv_mae_mean", "CV MAE by Dataset and Model", mae_cv_png, higher_is_better=False)
+    save_metric_bar_chart(results_df, "test_mae", "Test MAE by Dataset and Model", mae_test_png, higher_is_better=False)
+    save_metric_bar_chart(results_df, "cv_r2_mean", "CV R2 by Dataset and Model", r2_cv_png, higher_is_better=True)
+    save_metric_bar_chart(results_df, "test_r2", "Test R2 by Dataset and Model", r2_test_png, higher_is_better=True)
 
     print("Saved:")
     print(" -", overview_path)
     print(" -", results_path)
     print(" -", best_path)
+    print(" -", overview_png)
+    print(" -", comparison_png)
+    print(" -", best_png)
+    print(" -", rmse_cv_png)
+    print(" -", rmse_test_png)
+    print(" -", mae_cv_png)
+    print(" -", mae_test_png)
+    print(" -", r2_cv_png)
+    print(" -", r2_test_png)
 
 
 if __name__ == "__main__":

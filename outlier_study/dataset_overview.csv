@@ -1,4 +1,4 @@
-dataset,rows,columns,rows_removed_vs_d0
+Dataset,Rows,Columns,Rows Removed vs D0
 D0_raw_no_drop_outliers,1197,10,0
 D1_iqr_removed,1071,10,126
 D2_winsorized_1_99,1197,10,0

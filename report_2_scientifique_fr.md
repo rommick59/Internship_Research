@@ -12,6 +12,8 @@ Les boxplots ci-dessous illustrent la distribution et la présence de valeurs ex
 *Figure 1 : Boîtes à moustaches montrant la dispersion et les valeurs extrêmes de chaque paramètre.*
 Chaque boîte à moustaches représente la répartition des valeurs pour une variable donnée. On observe que certaines variables, comme SE (énergie spécifique), FPI et TPI, présentent de nombreux points au-delà des moustaches, indiquant la présence de valeurs extrêmes (outliers). Cela justifie leur traitement lors du prétraitement. D’autres variables, comme CRS (RPM) ou AR (mm/min), montrent une distribution plus resserrée, traduisant une variabilité plus faible. L’analyse de ces boxplots permet d’identifier rapidement les variables nécessitant une attention particulière pour garantir la robustesse des analyses ultérieures.
 
+Par exemple, les variables SE (énergie spécifique), FPI et TPI présentent de nombreux points au-delà des moustaches, ce qui indique la présence de valeurs extrêmes (outliers) susceptibles de biaiser les analyses statistiques. Ces variables requièrent donc un traitement spécifique, tel que la suppression ou l’imputation des valeurs aberrantes, afin d’assurer la fiabilité des résultats. À l’inverse, des variables comme CRS (RPM) ou AR (mm/min) montrent une distribution plus homogène et nécessitent moins d’ajustements. Ainsi, l’analyse des boxplots permet de cibler précisément les variables à surveiller et à corriger lors du prétraitement.
+
 ## Analyse exploratoire des données
 
 ### Histogrammes des variables
@@ -42,4 +44,4 @@ La matrice de corrélation met en évidence les liens entre toutes les variables
 Ces résultats confirment l’importance de certains paramètres mécaniques et énergétiques dans la progression du tunnelier. L’avance (AR) apparaît comme le facteur principal, tandis que l’augmentation de l’énergie spécifique ou des indices de performance traduit une difficulté accrue d’avancement. Les visualisations et l’analyse statistique permettent ainsi de sélectionner les variables les plus pertinentes pour la modélisation prédictive à venir.
 
 ## Conclusion
-Le prétraitement et l’analyse exploratoire ont permis de fiabiliser le jeu de données et de mieux comprendre la structure des relations entre les variables. Ces étapes constituent une base solide pour le développement de modèles de prédiction du taux de progression.
+Le prétraitement et l’analyse exploratoire ont permis de fiabiliser le jeu de données et de mieux comprendre la structure des relations entre les variables. Ces étapes constituent une base solide pour le développement de modèles de prédiction du taux de progression cependant le fait qu'il y a des outliners dans le jeu de données nécessite une attention particulière lors de la modélisation et donc on devra regarde les impacts de ces valeurs extrêmes sur les résultats du modèle (pour les garder ou non).

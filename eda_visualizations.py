@@ -60,27 +60,21 @@ for j in range(len(numeric_cols), len(axes)):
 fig.subplots_adjust(hspace=0.95, wspace=0.28, bottom=0.12, top=0.95)
 plt.show()
 
-# 2. Boxplots for outlier detection (all in one figure)
-box_cols = 3
-box_rows = math.ceil(len(numeric_cols) / box_cols)
-fig, axes = plt.subplots(box_rows, box_cols, figsize=(box_cols * 6.6, box_rows * 5.0))
-axes = axes.flatten() if hasattr(axes, 'flatten') else [axes]
+# 2. Boxplots for outlier detection (vertical, one per subplot, aligned horizontally, independent y-axis)
+fig, axes = plt.subplots(1, len(numeric_cols), figsize=(2.5 * len(numeric_cols), 6))
+if len(numeric_cols) == 1:
+    axes = [axes]
 
 for i, col in enumerate(numeric_cols):
-    sns.boxplot(x=df_numeric[col].dropna(), ax=axes[i])
+    sns.boxplot(y=df_numeric[col], ax=axes[i], color='skyblue')
     axes[i].set_title(pretty_label(col), fontsize=11, pad=10)
     axes[i].set_xlabel('')
-    axes[i].xaxis.label.set_visible(False)
-    row_idx = i // box_cols
-    if row_idx < box_rows - 1:
-        axes[i].tick_params(axis='x', labelbottom=False)
-    else:
-        axes[i].tick_params(axis='x', labelrotation=25, labelsize=8)
+    axes[i].set_ylabel(pretty_label(col), fontsize=10)
+    axes[i].tick_params(axis='y', labelsize=9)
+    axes[i].set_xticks([])
 
-for j in range(len(numeric_cols), len(axes)):
-    fig.delaxes(axes[j])
-
-fig.subplots_adjust(hspace=0.95, wspace=0.28, bottom=0.12, top=0.95)
+fig.suptitle("Boxplots of Variables (Each Variable Independent)", fontsize=14, y=0.995)
+plt.tight_layout(rect=[0, 0, 1, 0.97])
 plt.show()
 
 # 3. Scatter plots: all in one figure (target vs all other numeric variables)

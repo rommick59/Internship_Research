@@ -10,6 +10,7 @@ La première étape a consisté à examiner le jeu de données afin d’identifi
 Les boxplots ci-dessous illustrent la distribution et la présence de valeurs extrêmes pour chaque variable :
 ![Boîtes à moustaches des variables](Box_plots.png)
 *Figure 1 : Boîtes à moustaches montrant la dispersion et les valeurs extrêmes de chaque paramètre.*
+
 Chaque boîte à moustaches représente la répartition des valeurs pour une variable donnée. On observe que certaines variables, comme SE (énergie spécifique), FPI et TPI, présentent de nombreux points au-delà des moustaches, indiquant la présence de valeurs extrêmes (outliers). Cela justifie leur traitement lors du prétraitement. D’autres variables, comme CRS (RPM) ou AR (mm/min), montrent une distribution plus resserrée, traduisant une variabilité plus faible. L’analyse de ces boxplots permet d’identifier rapidement les variables nécessitant une attention particulière pour garantir la robustesse des analyses ultérieures.
 
 Par exemple, les variables SE (énergie spécifique), FPI et TPI présentent de nombreux points au-delà des moustaches, ce qui indique la présence de valeurs extrêmes (outliers) susceptibles de biaiser les analyses statistiques. Ces variables requièrent donc un traitement spécifique, tel que la suppression ou l’imputation des valeurs aberrantes, afin d’assurer la fiabilité des résultats. À l’inverse, des variables comme CRS (RPM) ou AR (mm/min) montrent une distribution plus homogène et nécessitent moins d’ajustements. Ainsi, l’analyse des boxplots permet de cibler précisément les variables à surveiller et à corriger lors du prétraitement.
@@ -20,6 +21,7 @@ Par exemple, les variables SE (énergie spécifique), FPI et TPI présentent de 
 Les histogrammes suivants montrent la distribution de chaque variable, mettant en évidence l’asymétrie et la présence de valeurs extrêmes :
 ![Histogrammes des variables](Histo.png)
 *Figure 2 : Histogrammes montrant la distribution de chaque paramètre.*
+
 Une analyse plus détaillée des histogrammes met en évidence la nature asymétrique des distributions pour la plupart des variables. Cette asymétrie, caractérisée par une majorité de faibles valeurs et quelques valeurs extrêmes, suggère que le comportement de la machine est généralement stable, mais que des événements rares et extrêmes peuvent survenir et impacter significativement les performances globales. Par exemple, la longue traîne droite observée pour SE et FPI indique la possibilité de conditions de fonctionnement particulièrement difficiles, qui devront être prises en compte lors de la modélisation prédictive. Cette observation souligne l’importance d’utiliser des méthodes statistiques robustes ou des transformations adaptées pour limiter l’influence des valeurs extrêmes.
 
 ### Nuages de points : PR vs paramètres

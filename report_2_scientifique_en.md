@@ -106,18 +106,66 @@ For example, the variables SE (specific energy), FPI, and TPI show many points b
 ### Histograms of Variables
 
 The following histograms show the distribution of each variable, highlighting skewness and the presence of extreme values:
-![Histograms of variables](Histo.png)
-_Figure 3: Histograms showing the distribution of each parameter._
+![Histograms of variables](Histo_p1.png)
+![Histograms of variables](Histo_p2.png)
+![Histograms of variables](Histo_p3.png)
+
+_Figure 3, 4 and 5 : Histograms showing the distribution of each parameter._
 
 A more detailed analysis of the histograms highlights the asymmetric nature of the distributions for most variables. This skewness, with a majority of low values and a few extreme ones, suggests that the machine’s behavior is generally stable, but rare and extreme events can occur and significantly impact overall performance. For instance, the long right tail seen for SE and FPI indicates the possibility of particularly challenging operating conditions, which should be considered in predictive modeling. This observation emphasizes the importance of using robust statistical methods or appropriate transformations to limit the influence of extreme values.
+
+## Histogram Analysis for Each Variable:
+
+- **CRS (RPM):** The distribution of CRS (RPM) is left-skewed, with most values tightly concentrated between 1.2 and 1.3. The spread is very narrow, indicating low variability in this parameter. There are very few higher values, and no significant outliers are observed, suggesting stable machine rotation speed during operation.
+
+- **AR (mm/min):** The AR (mm/min) variable shows a right-skewed distribution. Most values are clustered between 20 and 40 mm/min, but there is a noticeable tail towards higher values, indicating occasional periods of much higher advance rates. This suggests that while the machine usually operates at moderate speeds, it sometimes encounters conditions requiring faster advancement.
+
+- **F/A(MF):** F/A(MF) is approximately symmetric, with the majority of data points falling between 250 and 350. The distribution is relatively balanced, with a few extreme values on both sides but no strong skewness. This indicates a consistent ratio for this parameter across the dataset.
+
+- **T/D3(MT):** The T/D3(MT) distribution is slightly right-skewed, with most values between 2 and 4. There are a few higher values, creating a long right tail, which may correspond to rare events or specific operational conditions.
+
+- **UEP (MPa):** UEP (MPa) is highly right-skewed, with the vast majority of values close to the minimum (around 0.1 MPa). A few higher outliers are present, indicating that high UEP values are rare but possible, likely reflecting occasional spikes in pressure.
+
+- **LEP (MPa):** LEP (MPa) also displays a right-skewed distribution, with most values near the lower end (0.1–0.15 MPa) and some higher values extending the tail. This suggests that low LEP values are typical, but the system can experience higher pressures in certain cases.
+
+- **SE(kW.h/m3):** SE(kW.h/m3) has a pronounced right-skew, with most data points at low values (around 2–3) and a long tail of higher values. This indicates that the machine usually operates efficiently, but there are rare instances of much higher specific energy consumption, possibly due to difficult ground conditions.
+
+- **FPI:** FPI shows a strong right-skewed distribution, with most values concentrated at the lower end (around 500–800) and several high outliers. The presence of these outliers suggests that, while typical performance is consistent, there are occasional periods of much higher FPI.
+
+- **TPI:** TPI is right-skewed, with the majority of values between 50 and 200. However, a few much higher values create a long tail, indicating that while most operations are within a standard range, some exceptional cases occur.
+
+- **PR(mm/r):** PR(mm/r) is slightly right-skewed, with most values between 10 and 35. A few higher values extend the distribution, suggesting that while penetration rates are generally moderate, there are instances of significantly higher rates.
 
 ### Scatter Plots: PR vs Parameters
 
 The following scatter plots illustrate the relationships between the advance rate (PR) and the main parameters:
-![Scatter plots: PR vs parameters](scatter_plot.png)
+![Scatter plots: PR vs parameters](scatter_plot_p1.png)
+![Scatter plots: PR vs parameters](scatter_plot_p2.png)
+![Scatter plots: PR vs parameters](scatter_plot_p3.png)
+
 _Figure 4: Scatter plots showing the relationship between PR and each parameter._
 
 A deeper examination of the scatter plots reveals not only the strength of the correlations but also the presence of subgroups or nonlinear trends. For example, the positive relationship between AR and PR is very pronounced, but there is also increasing dispersion at higher values, which may indicate the influence of other unaccounted factors. For SE, FPI, and TPI, the negative trend is clear, but some points deviate from the general trend, suggesting special cases or atypical operating conditions. Visual analysis thus helps identify areas of interest for further study, particularly regarding extreme values or unusual groupings.
+
+**Detailed scatter plot analysis (PR on the x-axis):**
+
+- **CRS (RPM) vs PR:** No clear trend is observed (relationship is weak/absent). Points are widely scattered across PR values, with no obvious subgroups and only limited atypical points.
+
+- **AR (mm/min) vs PR:** A strong positive and mainly linear relationship is visible. Most points align along a clear trend, while dispersion increases at higher PR, suggesting additional factors may influence performance in that range.
+
+- **F/A(MF) vs PR:** The relationship appears weak, with a diffuse cloud and no consistent increasing/decreasing pattern. This suggests F/A(MF) alone does not explain PR variability, and no distinct clusters dominate the plot.
+
+- **T/D3(MT) vs PR:** A weak association is observed, possibly non-linear. The points are dispersed and include a few atypical observations, which may indicate special operating conditions rather than a stable monotonic trend.
+
+- **UEP (MPa) vs PR:** A mild negative tendency is visible: higher UEP values occur more often at lower PR. The scatter remains broad, indicating a weak-to-moderate relationship with some exceptions/outliers.
+
+- **LEP (MPa) vs PR:** The pattern is weak and slightly negative. Most points cluster at low LEP values while PR varies widely, with a small number of higher-LEP cases tending toward lower PR.
+
+- **SE (kW.h/m3) vs PR:** A clear negative and non-linear relationship is present. Low SE corresponds to a wide range of PR, whereas high SE is mostly associated with low PR; extreme high-SE points reflect rare, difficult conditions.
+
+- **FPI vs PR:** A negative association is observed, with higher FPI more frequent when PR is low. The trend is visible but not perfectly linear, and several points deviate from the main pattern.
+
+- **TPI vs PR:** The scatter plot indicates a negative relationship, with higher TPI generally linked to lower PR. Dispersion increases at higher TPI values, and a few outliers suggest atypical or extreme cases.
 
 ### Density Plots: PR vs Parameters
 
@@ -134,6 +182,7 @@ The Spearman correlation matrix below summarizes the strength and direction of r
 _Figure 6: Spearman correlation matrix for all variables._
 
 A detailed analysis of the correlation matrix highlights the structure of dependencies between variables. The very strong positive correlation between AR and PR confirms the central role of advance in machine performance. The marked negative correlations for SE, FPI, and TPI underline their impact as difficulty indicators. It is noteworthy that some variables show moderate or weak correlations, which may indicate indirect effects or complex interactions not captured by bivariate analysis. This matrix also helps detect possible redundancies between variables, thus guiding parameter selection for modeling.
+
 
 ## Interpretation and Discussion
 

@@ -44,14 +44,11 @@ axes = axes.flatten() if hasattr(axes, 'flatten') else [axes]
 for i, col in enumerate(numeric_cols):
     sns.histplot(df_numeric[col].dropna(), kde=True, bins=30, ax=axes[i])
     axes[i].set_title(pretty_label(col), fontsize=11, pad=10)
-    axes[i].set_xlabel('')
+    axes[i].set_xlabel(pretty_label(col), fontsize=10)
     axes[i].set_ylabel('Frequency', fontsize=10)
-    axes[i].xaxis.label.set_visible(False)
-    row_idx = i // cols
-    if row_idx < rows - 1:
-        axes[i].tick_params(axis='x', labelbottom=False)
-    else:
-        axes[i].tick_params(axis='x', labelrotation=25, labelsize=8)
+    axes[i].xaxis.label.set_visible(True)
+    axes[i].yaxis.label.set_visible(True)
+    axes[i].tick_params(axis='x', labelbottom=True, labelrotation=25, labelsize=8)
     axes[i].tick_params(axis='y', labelsize=9)
 
 for j in range(len(numeric_cols), len(axes)):
@@ -91,22 +88,18 @@ if target in df_numeric.columns:
     if len(scatter_features) > 0:
         scat_cols = 3
         scat_rows = math.ceil(len(scatter_features) / scat_cols)
-        fig, axes = plt.subplots(scat_rows, scat_cols, figsize=(scat_cols * 6.8, scat_rows * 5.1))
+        fig, axes = plt.subplots(scat_rows, scat_cols, figsize=(scat_cols * 8, scat_rows * 6))
         axes = axes.flatten() if hasattr(axes, 'flatten') else [axes]
 
         for i, col in enumerate(scatter_features):
-            sns.scatterplot(x=df_numeric[col], y=df_numeric[target], ax=axes[i], s=18)
-            axes[i].set_title(f'{pretty_label(col)} vs {pretty_label(target)}', fontsize=10, pad=10)
-            axes[i].set_xlabel('')
-            axes[i].set_ylabel('')
-            axes[i].xaxis.label.set_visible(False)
-            axes[i].yaxis.label.set_visible(False)
-            row_idx = i // scat_cols
-            if row_idx < scat_rows - 1:
-                axes[i].tick_params(axis='x', labelbottom=False)
-            else:
-                axes[i].tick_params(axis='x', labelrotation=25, labelsize=8)
-            axes[i].tick_params(axis='y', labelsize=8)
+            sns.scatterplot(x=df_numeric[target], y=df_numeric[col], ax=axes[i], s=18)
+            axes[i].set_title(f'{pretty_label(target)} vs {pretty_label(col)}', fontsize=12, pad=12)
+            axes[i].set_xlabel(pretty_label(target), fontsize=11)
+            axes[i].set_ylabel(pretty_label(col), fontsize=11)
+            axes[i].xaxis.label.set_visible(True)
+            axes[i].yaxis.label.set_visible(True)
+            axes[i].tick_params(axis='x', labelrotation=25, labelsize=9)
+            axes[i].tick_params(axis='y', labelsize=9)
 
         for j in range(len(scatter_features), len(axes)):
             fig.delaxes(axes[j])

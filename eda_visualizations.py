@@ -31,6 +31,14 @@ def pretty_label(label: str) -> str:
     # Shorten long engineering units for cleaner subplot titles.
     return label.replace('kW· h/m3', 'kW.h/m3')
 
+
+def heatmap_label(label: str) -> str:
+    # Keep full label, but split unit to a second line for readability.
+    cleaned = pretty_label(label)
+    if '(' in cleaned:
+        return cleaned.replace('(', '\n(')
+    return cleaned
+
 if len(numeric_cols) == 0:
     raise ValueError('No numeric columns were detected in TBM_data_cleaned.csv.')
 
@@ -112,16 +120,26 @@ else:
 # 4. Correlation matrix (heatmap) - Spearman for non-linear monotonic relationships
 corr = df_numeric.corr(method='spearman')
 if corr.size > 0:
-    fig, ax = plt.subplots(figsize=(11.5, 9.5))
-    short_labels = [
-        pretty_label(c)
-        for c in corr.columns
-    ]
-    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', annot_kws={'size': 8}, ax=ax)
-    ax.set_xticklabels(short_labels, rotation=45, ha='right', rotation_mode='anchor', fontsize=9)
-    ax.set_yticklabels(short_labels, rotation=0, fontsize=9)
-    ax.set_title('Correlation Matrix (Spearman)', pad=12)
-    fig.subplots_adjust(bottom=0.24, left=0.20, right=0.98, top=0.93)
+    fig, ax = plt.subplots(figsize=(26, 24), dpi=150)
+    short_labels = [heatmap_label(c) for c in corr.columns]
+    heatmap = sns.heatmap(
+        corr,
+        annot=True,
+        cmap='coolwarm',
+        fmt='.2f',
+        annot_kws={'size': 14, 'weight': 'bold'},
+        linewidths=1.8,
+        linecolor='white',
+        cbar_kws={'label': 'Spearman Correlation', 'shrink': 0.85},
+        ax=ax
+    )
+    ax.set_xticklabels(short_labels, rotation=35, ha='right', rotation_mode='anchor', fontsize=11)
+    ax.set_yticklabels(short_labels, rotation=0, fontsize=10)
+    ax.set_title('Correlation Matrix (Spearman)', pad=26, fontsize=20, weight='bold')
+    cbar = heatmap.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=12)
+    cbar.set_label('Spearman Correlation', fontsize=14, weight='bold')
+    fig.subplots_adjust(bottom=0.28, left=0.18, right=0.99, top=0.90)
     plt.show()
 else:
     print('No numeric columns available for correlation heatmap.')
@@ -136,7 +154,7 @@ if target in df_numeric.columns:
         fig, axes = plt.subplots(
             kde_rows,
             kde_cols,
-            figsize=(kde_cols * 6.8, kde_rows * 5.2),
+            figsize=(kde_cols * 8, kde_rows * 6),  # Larger size for readability
             squeeze=False,
         )
         flat_axes = axes.ravel()
@@ -151,8 +169,8 @@ if target in df_numeric.columns:
 
             sns.kdeplot(
                 data=subset,
-                x=col,
-                y=target,
+                x=target,
+                y=col,
                 fill=True,
                 cmap='viridis',
                 thresh=0.05,
@@ -160,17 +178,13 @@ if target in df_numeric.columns:
                 alpha=0.7,
                 ax=ax,
             )
-            ax.set_title(f'{pretty_label(col)} vs {pretty_label(target)}', fontsize=10, pad=10)
-            ax.set_xlabel('')
-            ax.set_ylabel('')
-            ax.xaxis.label.set_visible(False)
-            ax.yaxis.label.set_visible(False)
-            row_idx = i // kde_cols
-            if row_idx < kde_rows - 1:
-                ax.tick_params(axis='x', labelbottom=False)
-            else:
-                ax.tick_params(axis='x', labelrotation=25, labelsize=8)
-            ax.tick_params(axis='y', labelsize=8)
+            ax.set_title(f'{pretty_label(target)} vs {pretty_label(col)}', fontsize=12, pad=12)
+            ax.set_xlabel(pretty_label(target), fontsize=11)
+            ax.set_ylabel(pretty_label(col), fontsize=11)
+            ax.xaxis.label.set_visible(True)
+            ax.yaxis.label.set_visible(True)
+            ax.tick_params(axis='x', labelrotation=25, labelsize=10)
+            ax.tick_params(axis='y', labelsize=10)
 
         for j in range(len(kde_features), len(flat_axes)):
             flat_axes[j].set_axis_off()

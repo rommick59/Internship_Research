@@ -170,18 +170,43 @@ A deeper examination of the scatter plots reveals not only the strength of the c
 ### Density Plots: PR vs Parameters
 
 Density plots provide further insight into the concentration of data points and the nature of the relationships:
-![Density plots: PR vs parameters](2DKDE.png)
+![Density plots: PR vs parameters](2DKDE_p1.png)
+![Density plots: PR vs parameters](2DKDE_p2.png)
+![Density plots: PR vs parameters](2DKDE_p3.png)
+
 _Figure 5: Density plots for PR and each parameter._
 
 The density plots provide a complementary perspective by highlighting areas of high data concentration. For AR vs PR, the maximum density in the high-value region not only confirms the positive correlation but also suggests that most observations occur under optimal performance conditions. Conversely, for SE, FPI, and TPI, the density is concentrated in areas of low PR and high index values, indicating that difficult situations are less frequent but strongly associated with reduced performance. This analysis helps identify critical operating ranges and guides optimization or maintenance strategies.
 
+**Detailed density plot analysis (PR on the x-axis):**
+
+- **CRS (RPM) vs PR:** The highest-density region is concentrated around CRS values close to 1.3–1.4, with PR spanning a broad range. The pattern suggests a moderate negative tendency overall, but the relationship is not purely linear due to the discrete/clustered CRS levels (vertical bands) and dispersion across PR.
+
+- **AR (mm/min) vs PR:** Density is strongly concentrated along a clear diagonal ridge, indicating a strong positive and mostly linear relationship. The highest-density zone occurs at lower-to-moderate PR and AR values, while the spread increases toward higher PR, suggesting additional variability under high-performance conditions.
+
+- **F/A(MF) vs PR:** The density is relatively spread out, with a broad concentration band rather than a sharp ridge. Only a weak (slightly negative) tendency is visible, indicating a limited direct relationship with PR and no distinct subgroups dominating the distribution.
+
+- **T/D3(MT) vs PR:** The highest-density region is centered around moderate T/D3(MT) values, while PR varies widely. A mild-to-moderate negative tendency can be observed, but the relationship appears weakly non-linear and dispersed, with some atypical zones that may reflect specific operating regimes.
+
+- **UEP (MPa) vs PR:** Density is mainly concentrated at very low UEP values, with PR distributed across low to moderate ranges. No clear trend is visible (relationship is close to absent), and the plot mostly shows a compact high-density core with scattered low-density points.
+
+- **LEP (MPa) vs PR:** The density peak occurs at low LEP values, and PR covers a wide range in that region. The tendency is weak and slightly negative, with a dispersed pattern rather than a distinct linear ridge, suggesting limited predictive value of LEP alone.
+
+- **SE (kW.h/m3) vs PR:** A strong negative and clearly non-linear relationship is visible. The highest density occurs at low SE with high PR, while higher SE values concentrate at lower PR; a long tail toward extreme SE highlights rare but severe operating conditions (atypical cases).
+
+- **FPI vs PR:** The density plot shows a strong negative association: high PR occurs mostly where FPI is low-to-moderate, whereas high FPI values are concentrated at low PR. The relationship is not perfectly linear and includes scattered low-density regions that may correspond to outliers or special operating events.
+
+- **TPI vs PR:** A strong negative tendency is evident, with the highest density at low TPI and higher PR. As TPI increases, density shifts toward lower PR, and dispersion increases, indicating more variability and occasional atypical cases at high index values.
+
 ### Correlation Matrix (Spearman)
 
 The Spearman correlation matrix below summarizes the strength and direction of relationships between all variables:
-![Spearman correlation matrix](Heatmap.png)
+![Spearman correlation matrix](Heatmap2.png)
 _Figure 6: Spearman correlation matrix for all variables._
 
-A detailed analysis of the correlation matrix highlights the structure of dependencies between variables. The very strong positive correlation between AR and PR confirms the central role of advance in machine performance. The marked negative correlations for SE, FPI, and TPI underline their impact as difficulty indicators. It is noteworthy that some variables show moderate or weak correlations, which may indicate indirect effects or complex interactions not captured by bivariate analysis. This matrix also helps detect possible redundancies between variables, thus guiding parameter selection for modeling.
+A more detailed reading of the Spearman matrix reveals several important patterns in both direct and inverse monotonic relationships. First, the correlation between AR and PR is extremely strong and positive (0.98), confirming that higher advance is consistently associated with higher penetration rate. In contrast, the relationships between PR and SE, FPI, and TPI are strongly negative (-0.85 to -0.86), meaning that as these difficulty-related indicators increase, PR tends to decrease markedly; this is a clear inverse correlation pattern.
+
+The matrix also distinguishes medium and weak effects: CRS has a moderate negative association with PR (0.57), while T/D3 and F/A(MF) are weaker-to-moderate negatives (-0.36$ and -0.26). UEP and LEP show weak links with PR (close to 0), suggesting limited direct monotonic predictive power when considered alone. In addition, very high positive correlations among explanatory variables (for example SE-TPI near 1.00 and strong FPI-SE/TPI links) indicate possible redundancy and multicollinearity risk. For modeling, this suggests prioritizing feature selection or regularization to avoid over-weighting strongly overlapping variables and to improve model robustness and interpretability.
 
 
 ## Interpretation and Discussion

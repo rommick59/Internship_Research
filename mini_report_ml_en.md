@@ -16,16 +16,101 @@ A typical supervised workflow is to define the target and constraints, prepare t
 One of the most common pitfalls is **data leakage**: using information that would not be available at prediction time (or that indirectly encodes the label). Leakage produces overly optimistic evaluation scores and leads to poor real-world performance.
 
 #### 2.3. Train/validation/test split
-Data splitting organizes evaluation. The training set is used to fit model parameters $\theta$, the validation set is used to select models and tune hyperparameters without touching the test set, and the test set provides the final unbiased estimate. For time-dependent data, shuffling across time can accidentally mix past and future; chronological splits are usually preferred to preserve realism.
+Data splitting organizes evaluation by **reserving unseen data** for honest generalization checks.
+
+- **Typical numeric split (example):** Train = **80%**, Validation = **10%**, Test = **10%**.
+- **Training set:** used to fit the model parameters $\theta$.
+- **Validation set:** used to choose the model family and tune hyperparameters (e.g., number of trees, depth, regularization strength).
+- **Test set:** used **once at the end** to report the final expected performance.
+
+```mermaid
+flowchart LR
+  A[Full dataset 100%] --> B[Train 80%\nFit parameters]
+  A --> C[Validation 10%\nTune hyperparameters]
+  A --> D[Test 10%\nFinal unbiased estimate]
+```
+
+For time-dependent data, shuffling across time can accidentally mix past and future; **chronological splits** (train on earlier samples, validate/test on later samples) are usually preferred to preserve realism.
 
 #### 2.4. Loss functions and learning
 Training typically solves an optimization problem of the form $\min_\theta \frac{1}{n}\sum_{i=1}^n \mathcal{L}(f_\theta(\mathbf{x}_i), y_i)$. In regression, common losses include MSE (more sensitive to large errors) and MAE (often more robust). Optimization depends on the model family (e.g., gradient-based methods for neural networks, iterative solvers for SVMs).
 
 #### 2.5. Major families of supervised models
-Common choices include **linear models** (fast and interpretable), **tree-based ensembles** (Random Forest, Gradient Boosting, often strong on tabular data), **SVM/SVR** (effective in high-dimensional settings but sometimes costly), and **neural networks** (very flexible for images, text, and sequences, but typically requiring more tuning). The right choice depends on data size, nonlinearity, and interpretability needs.
+Below are common **supervised regression** models (often used for tabular engineering datasets), including the ones typically considered for projects where the target is continuous.
+
+##### 2.5.1. Linear Regression (baseline)
+Linear regression predicts with a weighted sum of features:
+$$\hat{y} = w_0 + \sum_{j=1}^{p} w_j x_j$$
+It is fast, interpretable, and a strong baseline. It can underfit when relationships are highly nonlinear.
+
+![Linear regression picture](images/Linear_Regression.png)
+
+The figure summarizes the idea: the prediction is a **single linear combination** of the input features, which makes the model easy to interpret and a strong baseline for comparison.
+
+##### 2.5.2. Random Forest Regression (key model)
+Random Forest combines many decision trees trained on bootstrapped samples and random subsets of features. The final prediction is an **average** across trees. This often performs well on tabular data and reduces overfitting compared to a single tree.
+
+![Random forest picture](images/Random_Forest.png)
+
+As shown in the figure, many trees are trained in parallel and then **averaged**, which typically improves robustness and generalization compared to one decision tree.
+
+##### 2.5.3. Gradient Boosting (often strong on tabular data)
+Boosting builds trees **sequentially**: each new tree learns to correct the errors (residuals) of the previous ensemble. It can achieve very high accuracy but requires careful tuning (learning rate, depth, number of estimators).
+
+![Gradient boosting picture](images/Gradient_Boosting.png)
+
+The figure highlights the sequential nature: each new weak model focuses on **reducing the previous errors**, which can yield strong accuracy on tabular datasets when properly tuned.
+
+##### 2.5.4. Support Vector Regression (SVR)
+SVR fits a function that keeps errors within an $\varepsilon$-tube when possible, and can use kernels to model nonlinearity. It can work well in high-dimensional settings but may be costly for large datasets.
+
+![SVR picture](images/Support_Vector_Regression.png)
+
+As illustrated, SVR aims to fit a function so that most points fall **within an $\varepsilon$ tolerance band**, relying on a subset of points (support vectors) that define the solution.
+
+##### 2.5.5. XGBoost (Gradient Boosting implementation)
+XGBoost is a widely used, efficient implementation of gradient-boosted decision trees with additional regularization and optimized training. It is often a strong choice for **tabular** regression problems.
+
+![XGBoost picture](images/XG-Boost.png)
+
+The figure reflects boosted trees added one after another: XGBoost is essentially **gradient boosting with optimized training and regularization**, often achieving strong performance on tabular regression.
+
+##### 2.5.6. RVM (Relevance Vector Machine)
+RVM is a Bayesian sparse model that is conceptually related to SVM/SVR but often yields a **sparser** solution (fewer “relevance vectors”) while producing probabilistic outputs in some formulations. It can be useful when you want kernel-based nonlinearity with sparsity.
+
+![RVM picture](images/RVM.png)
+
+The figure emphasizes the key idea: after a kernel mapping, a Bayesian mechanism selects a **small set of relevance vectors**, yielding a sparse model that can be easier to deploy than dense kernel methods.
+
+In practice, a common approach is: start with **Linear/Ridge** as a baseline, then compare to **Random Forest / Extra Trees** and **Boosting (e.g., XGBoost)** as stronger nonlinear models, using the same splits and metrics.
 
 #### 2.6. Evaluation: $R^2$, $R$, MSE, RMSE, and MAE
-In regression, error magnitude is summarized with **MSE** and **MAE**, while **RMSE** ($\sqrt{\mathrm{MSE}}$) expresses error in the same unit as the target. Goodness of fit is often reported with $R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}$ (comparison to a mean predictor) and the correlation coefficient $R$ between $y$ and $\hat{y}$, which indicates how well predicted variations track true variations.
+In regression, error magnitude is summarized with **MSE** and **MAE**, while **RMSE** ($\sqrt{\mathrm{MSE}}$) expresses error in the same unit as the target. Goodness of fit is often reported with:
+
+- $R^2 = 1-\frac{\sum_i (y_i-\hat{y}_i)^2}{\sum_i (y_i-\bar{y})^2}$ (comparison to a mean predictor)
+- the correlation coefficient $R$ between $y$ and $\hat{y}$ (how well variations track each other)
+
+The key point is that each metric has a **value range** and a typical interpretation:
+
+| Metric | Range | Better when… | How to interpret values |
+|---|---:|---|---|
+| $R^2$ | $(-\infty, 1]$ | closer to **1** | $1$ = perfect; $0$ = same as predicting the mean; negative = worse than the mean baseline |
+| $R$ | $[-1, 1]$ | closer to **+1** | $+1$ = perfect positive linear association; $0$ = no linear association; $-1$ = perfect inverse association |
+| MSE | $[0, +\infty)$ | closer to **0** | $0$ = perfect; scale depends on target units squared; sensitive to large errors (outliers) |
+| RMSE | $[0, +\infty)$ | closer to **0** | $0$ = perfect; in same unit as $y$; compare RMSE to the typical magnitude/variation of $y$ |
+| MAE | $[0, +\infty)$ | closer to **0** | $0$ = perfect; in same unit as $y$; more robust than MSE to large outliers |
+
+Practical reading examples (on the **validation/test** split):
+
+- If $R^2 \approx 0.80$, the model explains about **80% of the variance** of $y$ relative to the mean baseline on that split.
+- If $R$ is close to **1**, predictions track the ups/downs of $y$ well; if $R$ is near **0**, the model may not capture the main trend.
+- If RMSE/MAE are small **relative to the target scale** (e.g., small compared to the typical range or standard deviation of $y$), the model is accurate in absolute terms.
+
+Because MSE/RMSE/MAE depend on the scale of $y$, comparisons are most meaningful when:
+
+1) you compare multiple models on the **same split**, and/or
+2) you compare to a simple baseline (mean predictor, linear regression), and/or
+3) you report an additional normalized metric (e.g., RMSE divided by the range or standard deviation of $y$).
 
 #### 2.7. Overfitting, bias–variance, and regularization
 Underfitting happens when the model is too simple; overfitting happens when it is too flexible and generalizes poorly. Regularization (Ridge/Lasso, early stopping, tree constraints) and cross-validation help improve generalization.

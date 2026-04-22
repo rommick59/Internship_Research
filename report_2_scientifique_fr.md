@@ -11,8 +11,8 @@ La première étape a consisté à examiner le jeu de données afin d’identifi
 ### Boîtes à moustaches des variables
 
 Les boxplots suivants illustrent la distribution et la présence de valeurs aberrantes pour chaque variable :
-![Boîtes à moustaches des variables](Box_plots_p1.png)
-![Boîtes à moustaches des variables](Box_plots_p2.png)
+![Boîtes à moustaches des variables](images/Box_plots_p1.png)
+![Boîtes à moustaches des variables](images/Box_plots_p2.png)
 _Figure 1 et 2 : Boîtes à moustaches montrant la dispersion et les valeurs aberrantes de chaque paramètre._
 
 ### Légende des boîtes à moustaches
@@ -105,9 +105,9 @@ Par exemple, les variables SE (énergie spécifique), FPI et TPI présentent de 
 ### Histogrammes des variables
 
 Les histogrammes suivants montrent la distribution de chaque variable, en mettant en évidence l’asymétrie et la présence de valeurs extrêmes :
-![Histogrammes des variables](Histo_p1.png)
-![Histogrammes des variables](Histo_p2.png)
-![Histogrammes des variables](Histo_p3.png)
+![Histogrammes des variables](images/Histo_p1.png)
+![Histogrammes des variables](images/Histo_p2.png)
+![Histogrammes des variables](images/Histo_p3.png)
 
 _Figures 3, 4 et 5 : Histogrammes montrant la distribution de chaque paramètre._
 
@@ -138,9 +138,9 @@ Une analyse plus détaillée des histogrammes met en évidence la nature asymét
 ### Nuages de points : PR vs paramètres
 
 Les nuages de points suivants illustrent les relations entre le taux de progression (PR) et les principaux paramètres :
-![Nuages de points : PR vs paramètres](scatter_plot_p1.png)
-![Nuages de points : PR vs paramètres](scatter_plot_p2.png)
-![Nuages de points : PR vs paramètres](scatter_plot_p3.png)
+![Nuages de points : PR vs paramètres](images/scatter_plot_p1.png)
+![Nuages de points : PR vs paramètres](images/scatter_plot_p2.png)
+![Nuages de points : PR vs paramètres](images/scatter_plot_p3.png)
 
 _Figure 4 : Nuages de points montrant la relation entre PR et chaque paramètre._
 
@@ -169,9 +169,9 @@ Un examen approfondi des nuages de points révèle non seulement la force des co
 ### Cartes de densité : PR vs paramètres
 
 Les cartes de densité apportent un éclairage complémentaire sur la concentration des points et la nature des relations :
-![Cartes de densité : PR vs paramètres](2DKDE_p1.png)
-![Cartes de densité : PR vs paramètres](2DKDE_p2.png)
-![Cartes de densité : PR vs paramètres](2DKDE_p3.png)
+![Cartes de densité : PR vs paramètres](images/2DKDE_p1.png)
+![Cartes de densité : PR vs paramètres](images/2DKDE_p2.png)
+![Cartes de densité : PR vs paramètres](images/2DKDE_p3.png)
 
 _Figure 5 : Cartes de densité pour PR et chaque paramètre._
 
@@ -200,7 +200,7 @@ Les cartes de densité fournissent une perspective complémentaire en mettant en
 ### Matrice de corrélation (Spearman)
 
 La matrice de corrélation de Spearman ci-dessous synthétise la force et le sens des relations entre toutes les variables :
-![Matrice de corrélation de Spearman](Heatmap2.png)
+![Matrice de corrélation de Spearman](images/Heatmap2.png)
 _Figure 6 : Matrice de corrélation de Spearman pour l’ensemble des variables._
 
 Une lecture plus détaillée de la matrice de Spearman met en évidence plusieurs structures importantes, à la fois en corrélations directes (positives) et inverses (négatives). D’abord, la corrélation entre AR et PR est extrêmement forte et positive ($\rho \approx 0.98$), ce qui confirme qu’une hausse de l’avance est associée de manière cohérente à une hausse du taux de pénétration. À l’inverse, les relations entre PR et SE, FPI et TPI sont fortement négatives ($\rho \approx -0.85$ à $-0.86$) : lorsque ces indicateurs de difficulté augmentent, PR tend à diminuer fortement. Il s’agit d’un schéma clair de corrélation inverse.

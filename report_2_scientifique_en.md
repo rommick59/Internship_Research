@@ -11,8 +11,8 @@ The first step consisted of examining the dataset to identify and handle missing
 ### Boxplots of Variables
 
 The following boxplots illustrate the distribution and presence of outliers for each variable:
-![Boxplots of variables](Box_plots_p1.png) 
-![Boxplots of variables](Box_plots_p2.png)
+![Boxplots of variables](images/Box_plots_p1.png) 
+![Boxplots of variables](images/Box_plots_p2.png)
 _Figure 1 and 2: Boxplots showing the spread and outliers for each parameter._
 
 ### Legend for Boxplots
@@ -106,9 +106,9 @@ For example, the variables SE (specific energy), FPI, and TPI show many points b
 ### Histograms of Variables
 
 The following histograms show the distribution of each variable, highlighting skewness and the presence of extreme values:
-![Histograms of variables](Histo_p1.png)
-![Histograms of variables](Histo_p2.png)
-![Histograms of variables](Histo_p3.png)
+![Histograms of variables](images/Histo_p1.png)
+![Histograms of variables](images/Histo_p2.png)
+![Histograms of variables](images/Histo_p3.png)
 
 _Figure 3, 4 and 5 : Histograms showing the distribution of each parameter._
 
@@ -139,9 +139,9 @@ A more detailed analysis of the histograms highlights the asymmetric nature of t
 ### Scatter Plots: PR vs Parameters
 
 The following scatter plots illustrate the relationships between the advance rate (PR) and the main parameters:
-![Scatter plots: PR vs parameters](scatter_plot_p1.png)
-![Scatter plots: PR vs parameters](scatter_plot_p2.png)
-![Scatter plots: PR vs parameters](scatter_plot_p3.png)
+![Scatter plots: PR vs parameters](images/scatter_plot_p1.png)
+![Scatter plots: PR vs parameters](images/scatter_plot_p2.png)
+![Scatter plots: PR vs parameters](images/scatter_plot_p3.png)
 
 _Figure 4: Scatter plots showing the relationship between PR and each parameter._
 
@@ -170,9 +170,9 @@ A deeper examination of the scatter plots reveals not only the strength of the c
 ### Density Plots: PR vs Parameters
 
 Density plots provide further insight into the concentration of data points and the nature of the relationships:
-![Density plots: PR vs parameters](2DKDE_p1.png)
-![Density plots: PR vs parameters](2DKDE_p2.png)
-![Density plots: PR vs parameters](2DKDE_p3.png)
+![Density plots: PR vs parameters](images/2DKDE_p1.png)
+![Density plots: PR vs parameters](images/2DKDE_p2.png)
+![Density plots: PR vs parameters](images/2DKDE_p3.png)
 
 _Figure 5: Density plots for PR and each parameter._
 
@@ -201,7 +201,7 @@ The density plots provide a complementary perspective by highlighting areas of h
 ### Correlation Matrix (Spearman)
 
 The Spearman correlation matrix below summarizes the strength and direction of relationships between all variables:
-![Spearman correlation matrix](Heatmap2.png)
+![Spearman correlation matrix](images/Heatmap2.png)
 _Figure 6: Spearman correlation matrix for all variables._
 
 A more detailed reading of the Spearman matrix reveals several important patterns in both direct and inverse monotonic relationships. First, the correlation between AR and PR is extremely strong and positive (0.98), confirming that higher advance is consistently associated with higher penetration rate. In contrast, the relationships between PR and SE, FPI, and TPI are strongly negative (-0.85 to -0.86), meaning that as these difficulty-related indicators increase, PR tends to decrease markedly; this is a clear inverse correlation pattern.

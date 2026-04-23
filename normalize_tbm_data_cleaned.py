@@ -8,14 +8,14 @@ Il :
 1) charge le CSV en chaînes ;
 2) nettoie les noms de colonnes (suppression des retours à la ligne, espaces) ;
 3) convertit toutes les colonnes en float (`,` -> `.`) ;
-4) applique une imputation (médiane) + un scaler (standard par défaut) ;
+4) applique une imputation (médiane) + un scaler (min-max [0,1] par défaut) ;
 5) exporte un CSV "ML-ready" et (optionnel) sauvegarde le préprocesseur.
 
 Usage (PowerShell) :
   c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/normalize_tbm_data_cleaned.py 
     --input Internship_Research/TBM_data_cleaned.csv 
     --output Internship_Research/TBM_data_cleaned_ml_ready.csv 
-    --scaler standard 
+        --scaler minmax 
     --save-preprocessor Internship_Research/tbm_preprocessor.joblib
 """
 
@@ -107,8 +107,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--scaler",
         choices=["standard", "minmax", "robust", "none"],
-        default="standard",
-        help="Type de normalisation/standardisation",
+        default="minmax",
+        help="Type de scaling (minmax recommandé pour normalisation [0,1])",
     )
     p.add_argument(
         "--save-preprocessor",

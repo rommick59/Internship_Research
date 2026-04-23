@@ -1,22 +1,22 @@
-"""Normalise TBM_data_cleaned.csv pour le Machine Learning.
+"""Normalize TBM_data_cleaned.csv for Machine Learning.
 
-Ce script est adapté au format du fichier `TBM_data_cleaned.csv` du repo :
-- séparateur : virgule (`,`) ;
-- beaucoup de valeurs numériques sont encodées en texte avec des décimales en virgule (ex: "1,3").
+This script is tailored to the repository's `TBM_data_cleaned.csv` format:
+- separator: comma (`,`) ;
+- many numeric values are stored as strings with comma decimals (e.g. "1,3").
 
-Il :
-1) charge le CSV en chaînes ;
-2) nettoie les noms de colonnes (suppression des retours à la ligne, espaces) ;
-3) convertit toutes les colonnes en float (`,` -> `.`) ;
-4) applique une imputation (médiane) + un scaler (min-max [0,1] par défaut) ;
-5) exporte un CSV "ML-ready" et (optionnel) sauvegarde le préprocesseur.
+It:
+1) loads the CSV as strings;
+2) cleans column names (removes newlines, extra spaces);
+3) converts all columns to float (`,` -> `.`);
+4) applies imputation (median) + scaling (Min-Max [0,1] by default);
+5) writes an ML-ready CSV and (optionally) saves the fitted preprocessor.
 
-Usage (PowerShell) :
-  c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/normalize_tbm_data_cleaned.py 
-    --input Internship_Research/TBM_data_cleaned.csv 
-    --output Internship_Research/TBM_data_cleaned_ml_ready.csv 
+Usage (PowerShell):
+    c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/normalize_tbm_data_cleaned.py 
+        --input Internship_Research/TBM_data_cleaned.csv 
+        --output Internship_Research/TBM_data_cleaned_ml_ready.csv 
         --scaler minmax 
-    --save-preprocessor Internship_Research/tbm_preprocessor.joblib
+        --save-preprocessor Internship_Research/tbm_preprocessor.joblib
 """
 
 from __future__ import annotations
@@ -36,14 +36,14 @@ def _clean_column_name(name: str) -> str:
     cleaned = name.replace("\n", " ").replace("\r", " ")
     cleaned = cleaned.strip()
     cleaned = re.sub(r"\s+", " ", cleaned)
-    # Certains caractères peuvent être mal décodés (ex: ). On garde le plus simple.
-    cleaned = cleaned.replace("\ufffd", "")  # caractère de remplacement "�"
+    # Some characters may be mis-decoded; keep it simple.
+    cleaned = cleaned.replace("\ufffd", "")  # replacement character (�), often due to encoding issues
     return cleaned
 
 
 def _to_float_series(series: pd.Series) -> pd.Series:
     s = series.astype("string").str.strip()
-    s = s.str.replace("\u00a0", "", regex=False)  # espaces insécables
+    s = s.str.replace("\u00a0", "", regex=False)  # non-breaking spaces
     s = s.str.replace(",", ".", regex=False)
     s = s.replace({"": pd.NA, "nan": pd.NA, "NaN": pd.NA, "None": pd.NA})
     return pd.to_numeric(s, errors="coerce")
@@ -60,9 +60,9 @@ def load_numeric_dataframe(csv_path: Path) -> pd.DataFrame:
         bad_cols = nan_ratio[nan_ratio > 0].sort_values(ascending=False)
         preview = ", ".join([f"{c}={bad_cols[c]:.1%}" for c in bad_cols.index[:5]])
         raise ValueError(
-            "Certaines colonnes n'ont pas pu être converties en numérique (NaN après conversion). "
+            "Some columns could not be converted to numeric (NaN after conversion). "
             f"Top: {preview}.\n"
-            "Vérifie le format du CSV (virgules, guillemets, encodage) ou adapte la conversion."
+            "Check the CSV format (commas, quotes, encoding) or adapt the conversion logic."
         )
 
     return numeric
@@ -80,7 +80,7 @@ def build_preprocessor(scaler_name: str) -> Pipeline:
     elif scaler_name == "none":
         scaler = "passthrough"
     else:
-        raise ValueError("--scaler doit être dans {standard, minmax, robust, none}.")
+        raise ValueError("--scaler must be one of {standard, minmax, robust, none}.")
 
     return Pipeline(
         steps=[
@@ -91,30 +91,30 @@ def build_preprocessor(scaler_name: str) -> Pipeline:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Normalise TBM_data_cleaned.csv pour ML")
+    p = argparse.ArgumentParser(description="Normalize TBM_data_cleaned.csv for ML")
     p.add_argument(
         "--input",
         type=Path,
         default=Path("Internship_Research/TBM_data_cleaned.csv"),
-        help="Chemin du CSV source",
+        help="Path to input CSV",
     )
     p.add_argument(
         "--output",
         type=Path,
         default=Path("Internship_Research/TBM_data_cleaned_ml_ready.csv"),
-        help="Chemin du CSV de sortie normalisé",
+        help="Path to output (scaled) CSV",
     )
     p.add_argument(
         "--scaler",
         choices=["standard", "minmax", "robust", "none"],
         default="minmax",
-        help="Type de scaling (minmax recommandé pour normalisation [0,1])",
+        help="Scaling type (minmax recommended for [0,1] normalization)",
     )
     p.add_argument(
         "--save-preprocessor",
         type=Path,
         default=None,
-        help="Chemin pour sauvegarder le Pipeline sklearn (.joblib)",
+        help="Path to save the fitted sklearn Pipeline (.joblib)",
     )
     return p.parse_args()
 
@@ -123,7 +123,7 @@ def main() -> int:
     args = parse_args()
 
     if not args.input.exists():
-        raise FileNotFoundError(f"Fichier introuvable: {args.input}")
+        raise FileNotFoundError(f"File not found: {args.input}")
 
     df = load_numeric_dataframe(args.input)
 
@@ -148,7 +148,7 @@ def main() -> int:
 
     print(f"OK: {args.input} -> {args.output} | shape={out_df.shape} | scaler={args.scaler}")
     if args.save_preprocessor is not None:
-        print(f"Préprocesseur sauvegardé: {args.save_preprocessor}")
+        print(f"Preprocessor saved: {args.save_preprocessor}")
 
     return 0
 

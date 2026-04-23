@@ -8,15 +8,8 @@ It:
 1) loads the CSV as strings;
 2) cleans column names (removes newlines, extra spaces);
 3) converts all columns to float (`,` -> `.`);
-4) applies imputation (median) + scaling (Min-Max [0,1] by default);
+4) applies imputation (median) + scaling (Min-Max [0,1]);
 5) writes an ML-ready CSV and (optionally) saves the fitted preprocessor.
-
-Usage (PowerShell):
-    c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/normalize_tbm_data_cleaned.py 
-        --input Internship_Research/TBM_data_cleaned.csv 
-        --output Internship_Research/TBM_data_cleaned_ml_ready.csv 
-        --scaler minmax 
-        --save-preprocessor Internship_Research/tbm_preprocessor.joblib
 """
 
 from __future__ import annotations
@@ -29,21 +22,20 @@ import pandas as pd
 from joblib import dump
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 
 def _clean_column_name(name: str) -> str:
     cleaned = name.replace("\n", " ").replace("\r", " ")
     cleaned = cleaned.strip()
     cleaned = re.sub(r"\s+", " ", cleaned)
-    # Some characters may be mis-decoded; keep it simple.
-    cleaned = cleaned.replace("\ufffd", "")  # replacement character (�), often due to encoding issues
+    cleaned = cleaned.replace("\ufffd", "")
     return cleaned
 
 
 def _to_float_series(series: pd.Series) -> pd.Series:
     s = series.astype("string").str.strip()
-    s = s.str.replace("\u00a0", "", regex=False)  # non-breaking spaces
+    s = s.str.replace("\u00a0", "", regex=False)
     s = s.str.replace(",", ".", regex=False)
     s = s.replace({"": pd.NA, "nan": pd.NA, "NaN": pd.NA, "None": pd.NA})
     return pd.to_numeric(s, errors="coerce")
@@ -61,27 +53,15 @@ def load_numeric_dataframe(csv_path: Path) -> pd.DataFrame:
         preview = ", ".join([f"{c}={bad_cols[c]:.1%}" for c in bad_cols.index[:5]])
         raise ValueError(
             "Some columns could not be converted to numeric (NaN after conversion). "
-            f"Top: {preview}.\n"
-            "Check the CSV format (commas, quotes, encoding) or adapt the conversion logic."
+            f"Top: {preview}."
         )
 
     return numeric
 
 
-def build_preprocessor(scaler_name: str) -> Pipeline:
-    scaler_name = scaler_name.lower().strip()
-
-    if scaler_name == "standard":
-        scaler = StandardScaler()
-    elif scaler_name == "minmax":
-        scaler = MinMaxScaler()
-    elif scaler_name == "robust":
-        scaler = RobustScaler()
-    elif scaler_name == "none":
-        scaler = "passthrough"
-    else:
-        raise ValueError("--scaler must be one of {standard, minmax, robust, none}.")
-
+def build_preprocessor(_: str | None = None) -> Pipeline:
+    # Always use Min-Max scaling to map features to [0, 1].
+    scaler = MinMaxScaler()
     return Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="median")),
@@ -106,9 +86,9 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--scaler",
-        choices=["standard", "minmax", "robust", "none"],
+        choices=["minmax"],
         default="minmax",
-        help="Scaling type (minmax recommended for [0,1] normalization)",
+        help="Scaling is fixed to minmax ([0,1]); kept for backward compatibility",
     )
     p.add_argument(
         "--save-preprocessor",
@@ -147,9 +127,6 @@ def main() -> int:
         )
 
     print(f"OK: {args.input} -> {args.output} | shape={out_df.shape} | scaler={args.scaler}")
-    if args.save_preprocessor is not None:
-        print(f"Preprocessor saved: {args.save_preprocessor}")
-
     return 0
 
 

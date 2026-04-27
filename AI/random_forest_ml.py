@@ -1,10 +1,12 @@
-"""Linear regression training/evaluation on the TBM normalized dataset.
+"""Random Forest regression training/evaluation on the TBM normalized dataset.
 
 This script uses the normalized dataset produced in this repo (values in [0, 1]).
-It trains a Linear Regression model (ordinary least squares) and evaluates it on
-multiple train/validation/test split configurations (test size can be 0).
+It trains a RandomForestRegressor and evaluates it on multiple train/validation/test
+split configurations.
 
-Metrics reported (on validation and test when available):
+Default splits intentionally exclude any configuration with test=0.
+
+Metrics reported (on validation and test):
 - R
 - R2
 - MSE
@@ -12,12 +14,9 @@ Metrics reported (on validation and test when available):
 - MAE
 
 Example (PowerShell):
-  c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/AI/linear_ml.py \
+  c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/AI/random_forest_ml.py \
     --data Internship_Research/TBM_data_cleaned_ml_ready.csv \
     --target "PR(mm/r)"
-
-You can customize split configurations:
-    --splits "0.7,0.15,0.15;0.6,0.2,0.2"
 """
 
 from __future__ import annotations
@@ -32,14 +31,14 @@ import pandas as pd
 try:
     from Internship_Research.normalize_tbm_data_cleaned import normalize_to_ml_ready
 except ModuleNotFoundError:
-    # Allow running as a plain script: `python Internship_Research/AI/linear_ml.py`
+    # Allow running as a plain script: `python Internship_Research/AI/random_forest_ml.py`
     # by injecting the repository root into sys.path.
     import sys
 
     repo_root = Path(__file__).resolve().parents[2]
     sys.path.insert(0, str(repo_root))
     from Internship_Research.normalize_tbm_data_cleaned import normalize_to_ml_ready
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
@@ -59,6 +58,10 @@ class SplitConfig:
                 raise ValueError(f"Split '{name}' must be >= 0")
         if self.train <= 0:
             raise ValueError("Train split must be > 0")
+        if self.val <= 0:
+            raise ValueError("Validation split must be > 0")
+        if self.test <= 0:
+            raise ValueError("Test split must be > 0")
 
 
 def parse_splits(value: str) -> list[SplitConfig]:
@@ -81,16 +84,12 @@ def parse_splits(value: str) -> list[SplitConfig]:
 
 
 def make_default_splits() -> list[SplitConfig]:
-    # Deliberately excludes configurations with test=0.
+    # Deliberately excludes 0.8/0.2/0.0
     return [
         SplitConfig(0.7, 0.15, 0.15),
         SplitConfig(0.6, 0.2, 0.2),
         SplitConfig(0.7, 0.1, 0.2),
     ]
-
-
-def build_estimator() -> LinearRegression:
-    return LinearRegression()
 
 
 def eval_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, float]:
@@ -116,43 +115,33 @@ def split_data(
     random_state: int,
 ) -> tuple[
     tuple[np.ndarray, np.ndarray],
-    tuple[np.ndarray, np.ndarray] | None,
-    tuple[np.ndarray, np.ndarray] | None,
+    tuple[np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray],
 ]:
-    if config.test > 0:
-        X_trainval, X_test, y_trainval, y_test = train_test_split(
-            X,
-            y,
-            test_size=config.test,
-            random_state=random_state,
-            shuffle=True,
-        )
-    else:
-        X_trainval, y_trainval = X, y
-        X_test, y_test = None, None
+    # 1) split off test
+    X_trainval, X_test, y_trainval, y_test = train_test_split(
+        X,
+        y,
+        test_size=config.test,
+        random_state=random_state,
+        shuffle=True,
+    )
 
-    if config.val > 0:
-        # Validation is taken from trainval.
-        val_fraction_of_trainval = config.val / (config.train + config.val)
-        X_train, X_val, y_train, y_val = train_test_split(
-            X_trainval,
-            y_trainval,
-            test_size=val_fraction_of_trainval,
-            random_state=random_state,
-            shuffle=True,
-        )
-    else:
-        X_train, y_train = X_trainval, y_trainval
-        X_val, y_val = None, None
+    # 2) split validation from trainval
+    val_fraction_of_trainval = config.val / (config.train + config.val)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_trainval,
+        y_trainval,
+        test_size=val_fraction_of_trainval,
+        random_state=random_state,
+        shuffle=True,
+    )
 
-    train = (X_train, y_train)
-    val = (X_val, y_val) if X_val is not None else None
-    test = (X_test, y_test) if X_test is not None else None
-    return train, val, test
+    return (X_train, y_train), (X_val, y_val), (X_test, y_test)
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Linear regression with multiple train/val/test splits")
+    p = argparse.ArgumentParser(description="Random Forest regression with multiple train/val/test splits")
     p.add_argument(
         "--data",
         type=Path,
@@ -183,10 +172,15 @@ def parse_args() -> argparse.Namespace:
         default=42,
         help="Random seed for shuffling/splitting",
     )
+
+    p.add_argument("--n-estimators", type=int, default=500, help="Number of trees")
+    p.add_argument("--max-depth", type=int, default=None, help="Max tree depth (default: unlimited)")
+    p.add_argument("--min-samples-leaf", type=int, default=1, help="Minimum samples per leaf")
+
     p.add_argument(
         "--out-results",
         type=Path,
-        default=Path("Internship_Research/AI/linear_results.csv"),
+        default=Path("Internship_Research/AI/random_forest_results.csv"),
         help="Where to write the evaluation table (CSV)",
     )
     return p.parse_args()
@@ -223,40 +217,42 @@ def main() -> int:
     for cfg in split_configs:
         train, val, test = split_data(X, y, cfg, random_state=args.random_state)
         X_train, y_train = train
+        X_val, y_val = val
+        X_test, y_test = test
 
-        estimator = build_estimator()
-        estimator.fit(X_train, y_train)
+        model = RandomForestRegressor(
+            n_estimators=args.n_estimators,
+            max_depth=args.max_depth,
+            min_samples_leaf=args.min_samples_leaf,
+            random_state=args.random_state,
+            n_jobs=-1,
+        )
+        model.fit(X_train, y_train)
 
         row: dict[str, object] = {
-            "estimator": "linear_regression",
+            "estimator": "random_forest",
+            "n_estimators": int(args.n_estimators),
+            "max_depth": (None if args.max_depth is None else int(args.max_depth)),
+            "min_samples_leaf": int(args.min_samples_leaf),
             "train": cfg.train,
             "val": cfg.val,
             "test": cfg.test,
             "n_train": int(len(y_train)),
-            "n_val": int(len(val[1])) if val is not None else 0,
-            "n_test": int(len(test[1])) if test is not None else 0,
+            "n_val": int(len(y_val)),
+            "n_test": int(len(y_test)),
         }
 
-        if val is not None:
-            X_val, y_val = val
-            y_val_pred = estimator.predict(X_val)
-            m = eval_metrics(y_val, y_val_pred)
-            row.update({f"val_{k}": float(v) for k, v in m.items()})
-        else:
-            row.update({"val_r2": np.nan, "val_mse": np.nan, "val_rmse": np.nan, "val_mae": np.nan})
+        y_val_pred = model.predict(X_val)
+        m = eval_metrics(y_val, y_val_pred)
+        row.update({f"val_{k}": float(v) for k, v in m.items()})
 
-        if test is not None:
-            X_test, y_test = test
-            y_test_pred = estimator.predict(X_test)
-            m = eval_metrics(y_test, y_test_pred)
-            row.update({f"test_{k}": float(v) for k, v in m.items()})
-        else:
-            row.update({"test_r2": np.nan, "test_mse": np.nan, "test_rmse": np.nan, "test_mae": np.nan})
+        y_test_pred = model.predict(X_test)
+        m = eval_metrics(y_test, y_test_pred)
+        row.update({f"test_{k}": float(v) for k, v in m.items()})
 
         rows.append(row)
 
     results = pd.DataFrame(rows)
-
     args.out_results.parent.mkdir(parents=True, exist_ok=True)
     results.to_csv(args.out_results, index=False)
 

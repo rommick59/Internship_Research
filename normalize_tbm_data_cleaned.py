@@ -41,7 +41,7 @@ def _to_float_series(series: pd.Series) -> pd.Series:
     return pd.to_numeric(s, errors="coerce")
 
 
-def load_numeric_dataframe(csv_path: Path) -> pd.DataFrame:
+def load_numeric_dataframe(csv_path: Path, *, strict: bool = True) -> pd.DataFrame:
     raw = pd.read_csv(csv_path, sep=",", quotechar='"', dtype=str, engine="python")
     raw.columns = [_clean_column_name(c) for c in raw.columns]
 
@@ -51,12 +51,58 @@ def load_numeric_dataframe(csv_path: Path) -> pd.DataFrame:
     if (nan_ratio > 0).any():
         bad_cols = nan_ratio[nan_ratio > 0].sort_values(ascending=False)
         preview = ", ".join([f"{c}={bad_cols[c]:.1%}" for c in bad_cols.index[:5]])
-        raise ValueError(
-            "Some columns could not be converted to numeric (NaN after conversion). "
-            f"Top: {preview}."
+        if strict:
+            raise ValueError(
+                "Some columns could not be converted to numeric (NaN after conversion). "
+                f"Top: {preview}."
+            )
+        print(
+            "WARNING: Some values could not be converted to numeric and will be imputed. "
+            f"Top NaN ratios: {preview}."
         )
 
     return numeric
+
+
+def normalize_to_ml_ready(
+    *,
+    input_csv: Path,
+    output_csv: Path,
+    save_preprocessor: Path | None = None,
+    strict: bool = True,
+) -> pd.DataFrame:
+    """Normalize an input CSV to an ML-ready scaled CSV.
+
+    - Converts comma-decimal strings to floats
+    - Imputes missing values with the median
+    - Scales all columns to [0,1] using MinMaxScaler
+    - Writes the transformed dataframe to `output_csv`
+    """
+
+    if not input_csv.exists():
+        raise FileNotFoundError(f"File not found: {input_csv}")
+
+    df = load_numeric_dataframe(input_csv, strict=strict)
+
+    preprocessor = build_preprocessor("minmax")
+    transformed = preprocessor.fit_transform(df)
+
+    out_df = pd.DataFrame(transformed, columns=df.columns)
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    out_df.to_csv(output_csv, index=False, float_format="%.6f")
+
+    if save_preprocessor is not None:
+        save_preprocessor.parent.mkdir(parents=True, exist_ok=True)
+        dump(
+            {
+                "preprocessor": preprocessor,
+                "feature_names": list(df.columns),
+                "source": str(input_csv),
+            },
+            save_preprocessor,
+        )
+
+    return out_df
 
 
 def build_preprocessor(_: str | None = None) -> Pipeline:
@@ -102,29 +148,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    if not args.input.exists():
-        raise FileNotFoundError(f"File not found: {args.input}")
-
-    df = load_numeric_dataframe(args.input)
-
-    preprocessor = build_preprocessor(args.scaler)
-    transformed = preprocessor.fit_transform(df)
-
-    out_df = pd.DataFrame(transformed, columns=df.columns)
-
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    out_df.to_csv(args.output, index=False, float_format="%.6f")
-
-    if args.save_preprocessor is not None:
-        args.save_preprocessor.parent.mkdir(parents=True, exist_ok=True)
-        dump(
-            {
-                "preprocessor": preprocessor,
-                "feature_names": list(df.columns),
-                "source": str(args.input),
-            },
-            args.save_preprocessor,
-        )
+    out_df = normalize_to_ml_ready(
+        input_csv=args.input,
+        output_csv=args.output,
+        save_preprocessor=args.save_preprocessor,
+        strict=True,
+    )
 
     print(f"OK: {args.input} -> {args.output} | shape={out_df.shape} | scaler={args.scaler}")
     return 0

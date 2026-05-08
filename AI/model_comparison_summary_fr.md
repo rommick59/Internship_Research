@@ -19,25 +19,28 @@ Note: le split **0.70 / 0.15 / 0.15** donne les meilleurs chiffres absolus ici, 
   - SVR (RBF, C=10, epsilon=0.01): R² = 0.9990, RMSE = 0.00765, MAE = 0.00538
   - RVM (RBF): R² = 0.9999, RMSE = 0.00224, MAE = 0.00066
   - XGBoost: R² = 0.9982, RMSE = 0.00991, MAE = 0.00508
+  - Gradient Boosting (sklearn): R² = 0.9988, RMSE = 0.00816, MAE = 0.00390
 - **Split 0.60/0.20/0.20**
   - Linéaire: R² = 0.9960, RMSE = 0.01504, MAE = 0.01066
   - Random Forest: R² = 0.9973, RMSE = 0.01235, MAE = 0.00532
   - SVR (RBF, C=10, epsilon=0.01): R² = 0.9986, RMSE = 0.00887, MAE = 0.00589
   - RVM (RBF): R² = 1.0000, RMSE = 0.00168, MAE = 0.00060
   - XGBoost: R² = 0.9987, RMSE = 0.00845, MAE = 0.00496
+  - Gradient Boosting (sklearn): R² = 0.9993, RMSE = 0.00624, MAE = 0.00333
 - **Split 0.70/0.10/0.20**
   - Linéaire: R² = 0.9960, RMSE = 0.01496, MAE = 0.01048
   - Random Forest: R² = 0.9976, RMSE = 0.01155, MAE = 0.00460
   - SVR (RBF, C=10, epsilon=0.01): R² = 0.9990, RMSE = 0.00763, MAE = 0.00531
   - RVM (RBF): R² = 1.0000, RMSE = 0.00146, MAE = 0.00049
   - XGBoost: R² = 0.9988, RMSE = 0.00832, MAE = 0.00471
+  - Gradient Boosting (sklearn): R² = 0.9993, RMSE = 0.00627, MAE = 0.00309
 
 ## Moyenne sur les 3 splits (TEST)
-- R (corrélation) moyen: linéaire = 0.998012 vs random forest = 0.998839 vs SVR = 0.999426 vs RVM = 0.999971 vs XGBoost = 0.999300
-- R² moyen: linéaire = 0.996009 vs random forest = 0.997609 vs SVR = 0.998842 vs RVM = 0.999941 vs XGBoost = 0.998586
-- MSE moyen: linéaire ≈ 0.000225 vs random forest ≈ 0.000135 vs SVR ≈ 0.000065 vs RVM ≈ 0.000003 vs XGBoost ≈ 0.000080
-- RMSE moyen: linéaire ≈ 0.014985 vs random forest ≈ 0.011585 vs SVR ≈ 0.008052 vs RVM ≈ 0.001793 vs XGBoost ≈ 0.008889
-- MAE moyen: linéaire ≈ 0.010530 vs random forest ≈ 0.004643 vs SVR ≈ 0.005525 vs RVM ≈ 0.000581 vs XGBoost ≈ 0.004919
+- R (corrélation) moyen: linéaire = 0.998012 vs random forest = 0.998839 vs SVR = 0.999426 vs RVM = 0.999971 vs XGBoost = 0.999300 vs Gradient Boosting = 0.999575
+- R² moyen: linéaire = 0.996009 vs random forest = 0.997609 vs SVR = 0.998842 vs RVM = 0.999941 vs XGBoost = 0.998586 vs Gradient Boosting = 0.999141
+- MSE moyen: linéaire ≈ 0.000225 vs random forest ≈ 0.000135 vs SVR ≈ 0.000065 vs RVM ≈ 0.000003 vs XGBoost ≈ 0.000080 vs Gradient Boosting ≈ 0.000048
+- RMSE moyen: linéaire ≈ 0.014985 vs random forest ≈ 0.011585 vs SVR ≈ 0.008052 vs RVM ≈ 0.001793 vs XGBoost ≈ 0.008889 vs Gradient Boosting ≈ 0.006890
+- MAE moyen: linéaire ≈ 0.010530 vs random forest ≈ 0.004643 vs SVR ≈ 0.005525 vs RVM ≈ 0.000581 vs XGBoost ≈ 0.004919 vs Gradient Boosting ≈ 0.003438
 
 ## Interprétation en mm/r (approximatif)
 Le dataset ML-ready utilise une normalisation Min-Max (0–1). La plage réelle de PR(mm/r) dans les données nettoyées est d’environ **47.69 mm/r** (de 2.31 à 50.0). Une erreur normalisée $e$ correspond donc à ~ $e \times 47.69$ mm/r.
@@ -48,6 +51,8 @@ Le dataset ML-ready utilise une normalisation Min-Max (0–1). La plage réelle 
 - MAE test moyen (RVM): ≈ **0.028 mm/r**
 - RMSE test moyen (XGBoost): ≈ **0.424 mm/r**
 - MAE test moyen (XGBoost): ≈ **0.235 mm/r**
+- RMSE test moyen (Gradient Boosting): ≈ **0.329 mm/r**
+- MAE test moyen (Gradient Boosting): ≈ **0.164 mm/r**
 
 ## Conclusion
 Selon l’objectif de la modélisation sur PR(mm/r):

@@ -232,7 +232,7 @@ def main() -> int:
         row: dict[str, object] = {
             "estimator": "random_forest",
             "n_estimators": int(args.n_estimators),
-            "max_depth": (None if args.max_depth is None else int(args.max_depth)),
+            "max_depth": ("None" if args.max_depth is None else int(args.max_depth)),
             "min_samples_leaf": int(args.min_samples_leaf),
             "train": cfg.train,
             "val": cfg.val,
@@ -241,6 +241,10 @@ def main() -> int:
             "n_val": int(len(y_val)),
             "n_test": int(len(y_test)),
         }
+
+        y_train_pred = model.predict(X_train)
+        m = eval_metrics(y_train, y_train_pred)
+        row.update({f"train_{k}": float(v) for k, v in m.items()})
 
         y_val_pred = model.predict(X_val)
         m = eval_metrics(y_val, y_val_pred)

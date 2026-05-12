@@ -249,6 +249,10 @@ def main() -> int:
             "n_test": int(len(y_test)),
         }
 
+        y_train_pred = model.predict(X_train)
+        m = eval_metrics(y_train, y_train_pred)
+        row.update({f"train_{k}": float(v) for k, v in m.items()})
+
         y_val_pred = model.predict(X_val)
         m = eval_metrics(y_val, y_val_pred)
         row.update({f"val_{k}": float(v) for k, v in m.items()})

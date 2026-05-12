@@ -237,6 +237,10 @@ def main() -> int:
             "n_test": int(len(test[1])) if test is not None else 0,
         }
 
+        y_train_pred = estimator.predict(X_train)
+        m = eval_metrics(y_train, y_train_pred)
+        row.update({f"train_{k}": float(v) for k, v in m.items()})
+
         if val is not None:
             X_val, y_val = val
             y_val_pred = estimator.predict(X_val)

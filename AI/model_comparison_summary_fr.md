@@ -42,6 +42,19 @@ Note: le split **0.70 / 0.15 / 0.15** donne les meilleurs chiffres absolus ici, 
   - Gradient Boosting (sklearn): R² = 0.9993, RMSE = 0.00627, MAE = 0.00309
   - AdaBoost (arbres, n_estimators=500, lr=0.05, depth=3): R² = 0.9857, RMSE = 0.02836, MAE = 0.02204
 
+## Split retenu (0.70/0.10/0.20) — TRAIN vs TEST
+Pour le choix du modèle, les métriques **TRAIN** sont utiles pour quantifier l’ajustement et comparer l’écart **TRAIN → TEST** (sur-apprentissage). Chiffres ci-dessous sur l’échelle **normalisée 0–1**.
+
+| Modèle | TRAIN R² | TRAIN RMSE | TRAIN MAE | TEST R² | TEST RMSE | TEST MAE |
+|---|---:|---:|---:|---:|---:|---:|
+| RVM | 1.000000 | 0.000095 | 0.000073 | 0.999962 | 0.001458 | 0.000486 |
+| Gradient Boosting | 0.999911 | 0.002209 | 0.001511 | 0.999302 | 0.006272 | 0.003085 |
+| SVR (RBF) | 0.999467 | 0.005404 | 0.004424 | 0.998967 | 0.007633 | 0.005308 |
+| XGBoost | 0.999986 | 0.000882 | 0.000663 | 0.998774 | 0.008315 | 0.004713 |
+| Random Forest | 0.999608 | 0.004635 | 0.002023 | 0.997635 | 0.011549 | 0.004596 |
+| Régression linéaire | 0.995498 | 0.015706 | 0.010647 | 0.996029 | 0.014965 | 0.010477 |
+| AdaBoost | 0.986805 | 0.026888 | 0.021953 | 0.985732 | 0.028365 | 0.022040 |
+
 ## Moyenne sur les 3 splits (TEST)
 - R (corrélation) moyen: linéaire = 0.998012 vs random forest = 0.998839 vs SVR = 0.999426 vs RVM = 0.999971 vs XGBoost = 0.999300 vs Gradient Boosting = 0.999575 vs AdaBoost = 0.992336
 - R² moyen: linéaire = 0.996009 vs random forest = 0.997609 vs SVR = 0.998842 vs RVM = 0.999941 vs XGBoost = 0.998586 vs Gradient Boosting = 0.999141 vs AdaBoost = 0.984639
@@ -51,6 +64,15 @@ Note: le split **0.70 / 0.15 / 0.15** donne les meilleurs chiffres absolus ici, 
 
 ## Interprétation en mm/r (approximatif)
 Le dataset ML-ready utilise une normalisation Min-Max (0–1). La plage réelle de PR(mm/r) dans les données nettoyées est d’environ **47.69 mm/r** (de 2.31 à 50.0). Une erreur normalisée $e$ correspond donc à ~ $e \times 47.69$ mm/r.
+
+Pour le split retenu **0.70/0.10/0.20**, les erreurs TEST (approx.) sont:
+- RVM: RMSE ≈ **0.070 mm/r**, MAE ≈ **0.023 mm/r**
+- Gradient Boosting: RMSE ≈ **0.299 mm/r**, MAE ≈ **0.147 mm/r**
+- SVR: RMSE ≈ **0.364 mm/r**, MAE ≈ **0.253 mm/r**
+- XGBoost: RMSE ≈ **0.397 mm/r**, MAE ≈ **0.225 mm/r**
+- Random Forest: RMSE ≈ **0.551 mm/r**, MAE ≈ **0.219 mm/r**
+- Linéaire: RMSE ≈ **0.714 mm/r**, MAE ≈ **0.500 mm/r**
+- AdaBoost: RMSE ≈ **1.353 mm/r**, MAE ≈ **1.051 mm/r**
 
 - RMSE test moyen: linéaire ≈ **0.715 mm/r** vs random forest ≈ **0.553 mm/r** vs SVR ≈ **0.384 mm/r**
 - MAE test moyen: linéaire ≈ **0.503 mm/r** vs random forest ≈ **0.223 mm/r** vs SVR ≈ **0.263 mm/r**
@@ -65,7 +87,8 @@ Le dataset ML-ready utilise une normalisation Min-Max (0–1). La plage réelle 
 
 ## Conclusion
 Selon l’objectif de la modélisation sur PR(mm/r):
-- **RVM** fournit les meilleures performances selon **RMSE**, **MAE** et **R²** sur les splits testés.
+- Sur le split retenu **0.70/0.10/0.20**, le **RVM** est le meilleur modèle selon **TEST RMSE**, **TEST MAE** et **TEST R²** (il arrive #1 sur ces trois critères dans les résultats exportés).
+- Globalement, sur les splits testés, le **RVM** fournit les meilleures performances selon **RMSE**, **MAE** et **R²**.
 
 La **régression linéaire** reste très performante mais légèrement moins précise.
 

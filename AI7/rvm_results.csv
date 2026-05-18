@@ -1,0 +1,2 @@
+estimator,kernel,degree,gamma,coef0,tol,max_iter,train,val,test,n_train,n_val,n_test,train_r,train_r2,train_mse,train_rmse,train_mae,train_vaf,val_r,val_r2,val_mse,val_rmse,val_mae,val_vaf,test_r,test_r2,test_mse,test_rmse,test_mae,test_vaf
+rvm,rbf,3,0.01,0.0,0.01,1000,0.8,0.0,0.2,957,0,240,0.9054552364616278,0.8197948166752907,0.01001635904434338,0.10008176179675986,0.07293759839483206,0.8197948166895705,,,,,,,0.9224292742039428,0.8502018400860625,0.008447134827816939,0.09190829575080227,0.06899628398871185,0.8503153478511004

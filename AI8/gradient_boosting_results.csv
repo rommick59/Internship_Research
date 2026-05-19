@@ -1,0 +1,2 @@
+estimator,n_estimators,learning_rate,max_depth,subsample,min_samples_leaf,train,val,test,n_train,n_val,n_test,train_r,train_r2,train_mse,train_rmse,train_mae,train_vaf,val_r,val_r2,val_mse,val_rmse,val_mae,val_vaf,test_r,test_r2,test_mse,test_rmse,test_mae,test_vaf
+gradient_boosting,200,0.01,3,1.0,2,0.8,0.0,0.2,957,0,240,0.9850721983642798,0.940135548179344,0.0033274505891877273,0.05768405836266834,0.04307294382340114,0.940135548179344,,,,,,,0.9825823781477026,0.9316549591075258,0.003853984425196377,0.06208046734035092,0.04862236807138419,0.9316646619775177

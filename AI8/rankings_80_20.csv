@@ -1,0 +1,61 @@
+metric,direction,rank,model,value
+test_mae,lower,1,Gradient Boosting,0.0486223680713841
+test_mae,lower,2,Random Forest,0.0651471443094963
+test_mae,lower,3,XGBoost,0.065200924906071
+test_mae,lower,4,RVM,0.0689962839887118
+test_mae,lower,5,Linear Regression,0.1192771900498763
+test_mse,lower,1,Gradient Boosting,0.0038539844251963
+test_mse,lower,2,XGBoost,0.0076196318431051
+test_mse,lower,3,Random Forest,0.0076615797623932
+test_mse,lower,4,RVM,0.0084471348278169
+test_mse,lower,5,Linear Regression,0.0204817926834526
+test_r,higher,1,Gradient Boosting,0.9825823781477026
+test_r,higher,2,XGBoost,0.9551425818403708
+test_r,higher,3,Random Forest,0.9350292415996933
+test_r,higher,4,RVM,0.9224292742039428
+test_r,higher,5,Linear Regression,0.7994742928733514
+test_r2,higher,1,Gradient Boosting,0.9316549591075258
+test_r2,higher,2,XGBoost,0.8648764518875593
+test_r2,higher,3,Random Forest,0.8641325640191099
+test_r2,higher,4,RVM,0.8502018400860625
+test_r2,higher,5,Linear Regression,0.6367839606849418
+test_rmse,lower,1,Gradient Boosting,0.0620804673403509
+test_rmse,lower,2,XGBoost,0.0872905025939543
+test_rmse,lower,3,Random Forest,0.0875304504866347
+test_rmse,lower,4,RVM,0.0919082957508022
+test_rmse,lower,5,Linear Regression,0.1431146138011511
+test_vaf,higher,1,Gradient Boosting,0.9316646619775176
+test_vaf,higher,2,XGBoost,0.8648765778108529
+test_vaf,higher,3,Random Forest,0.8644013410042585
+test_vaf,higher,4,RVM,0.8503153478511004
+test_vaf,higher,5,Linear Regression,0.637960187788505
+train_mae,lower,1,Gradient Boosting,0.0430729438234011
+train_mae,lower,2,XGBoost,0.05805032638422
+train_mae,lower,3,Random Forest,0.063911472021656
+train_mae,lower,4,RVM,0.072937598394832
+train_mae,lower,5,Linear Regression,0.1132799588094166
+train_mse,lower,1,Gradient Boosting,0.0033274505891877
+train_mse,lower,2,XGBoost,0.0064087036256723
+train_mse,lower,3,Random Forest,0.0075983099154398
+train_mse,lower,4,RVM,0.0100163590443433
+train_mse,lower,5,Linear Regression,0.0209923289542935
+train_r,higher,1,Gradient Boosting,0.9850721983642798
+train_r,higher,2,XGBoost,0.9626374006466182
+train_r,higher,3,Random Forest,0.9315219585551175
+train_r,higher,4,RVM,0.9054552364616278
+train_r,higher,5,Linear Regression,0.7888759035060307
+train_r2,higher,1,Gradient Boosting,0.940135548179344
+train_r2,higher,2,XGBoost,0.8847004578584658
+train_r2,higher,3,Random Forest,0.8632981480388257
+train_r2,higher,4,RVM,0.8197948166752907
+train_r2,higher,5,Linear Regression,0.6223251911324565
+train_rmse,lower,1,Gradient Boosting,0.0576840583626683
+train_rmse,lower,2,XGBoost,0.0800543791786077
+train_rmse,lower,3,Random Forest,0.087168285032114
+train_rmse,lower,4,RVM,0.1000817617967598
+train_rmse,lower,5,Linear Regression,0.1448872974221466
+train_vaf,higher,1,Gradient Boosting,0.940135548179344
+train_vaf,higher,2,XGBoost,0.8847106993232643
+train_vaf,higher,3,Random Forest,0.8632993844840503
+train_vaf,higher,4,RVM,0.8197948166895705
+train_vaf,higher,5,Linear Regression,0.6223251911324565

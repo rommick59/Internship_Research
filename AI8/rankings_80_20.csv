@@ -11,7 +11,7 @@ test_mse,lower,4,RVM,0.0084471348278169
 test_mse,lower,5,Linear Regression,0.0204817926834526
 test_r,higher,1,Gradient Boosting,0.9825823781477026
 test_r,higher,2,XGBoost,0.9551425818403708
-test_r,higher,3,Random Forest,0.9350292415996933
+test_r,higher,3,Random Forest,0.9350292415996934
 test_r,higher,4,RVM,0.9224292742039428
 test_r,higher,5,Linear Regression,0.7994742928733514
 test_r2,higher,1,Gradient Boosting,0.9316549591075258
@@ -41,7 +41,7 @@ train_mse,lower,4,RVM,0.0100163590443433
 train_mse,lower,5,Linear Regression,0.0209923289542935
 train_r,higher,1,Gradient Boosting,0.9850721983642798
 train_r,higher,2,XGBoost,0.9626374006466182
-train_r,higher,3,Random Forest,0.9315219585551175
+train_r,higher,3,Random Forest,0.9315219585551178
 train_r,higher,4,RVM,0.9054552364616278
 train_r,higher,5,Linear Regression,0.7888759035060307
 train_r2,higher,1,Gradient Boosting,0.940135548179344

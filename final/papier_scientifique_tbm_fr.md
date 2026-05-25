@@ -4,7 +4,7 @@
 La prediction du taux de progression (PR, mm/r) des tunneliers (TBM) est un probleme de genie civil a fort impact pratique, car elle influence directement la planification, le cout et la securite des chantiers souterrains. Ce travail propose une etude complete allant du pretraitement des donnees a l'analyse exploratoire, puis a la comparaison de plusieurs modeles supervises de machine learning et a leur explicabilite. Le jeu de donnees regroupe des variables operationnelles et derivees telles que CRS (RPM), F/A(MF), T/D3(MT), UEP (MPa), LEP (MPa), SE, FPI, TPI et la cible PR. Les resultats exploratoires montrent une relation positive tres forte entre AR et PR, ainsi que des relations negatives marquees entre PR et les indices de difficulte tels que SE, FPI et TPI. Sur les essais de modelisation, les familles RVM, Gradient Boosting, XGBoost, Random Forest, SVR et Linear Regression ont ete comparees via des decoupes train/validation/test multiples. Le RVM fournit les meilleures performances globales sur plusieurs splits, tandis que le Gradient Boosting est le meilleur sur le split 80/20 utilise pour l'analyse d'explicabilite. Les analyses SHAP, PDP et ICE montrent que TPI domine largement les decisions du Gradient Boosting, avec un effet moyen negatif sur la prediction, alors que T/D3(MT) joue un role secondaire positif. L'ensemble du travail montre qu'un pipeline base sur des donnees operationnelles bien pretraitees peut fournir une prediction fiable du PR, tout en restant interpretable.
 
 ## Mots-cles
-TBM, taux de progression, machine learning, Gradient Boosting, RVM, SHAP, PDP, ICE, analyse exploratoire.
+TBM, taux de progression, machine learning, Gradient Boosting, RVM, explicabilité, SHAP, PDP, ICE, analyse exploratoire.
 
 ## 1. Introduction
 L'excavation mecanisee par tunnelier (Tunnel Boring Machine, TBM) constitue une solution majeure pour la realisation de tunnels de transport, de reseaux d'assainissement et d'ouvrages hydrauliques. Dans ces chantiers, le taux de progression (PR) est une variable cle car il conditionne le rendement journalier, la consommation energetique, l'usure des outils et, au final, le cout global du projet. La capacite a prevoir ce taux avant ou pendant l'excavation represente donc un avantage decisif pour l'ingenierie des travaux souterrains.
@@ -73,11 +73,23 @@ Plusieurs familles de modeles supervises ont ete evaluees dans le projet :
 Les performances ont ete mesurees a l'aide de R, R2, MSE, RMSE et MAE sur differents splits train/validation/test. Les principaux resultats de synthese du dossier interne montrent que le RVM est globalement le meilleur modele sur plusieurs decoupes, tandis que le Gradient Boosting devient la meilleure option sur le split 80/20 retenu pour l'analyse explicable [voir synthese interne de comparaison].
 
 ### 2.5. Explicabilite
-L'explicabilite du meilleur modele sur le split 80/20 a ete analysee via SHAP, PDP et ICE. SHAP decompose la prediction sous la forme :
+L'explicabilite du meilleur modele sur le split 80/20 a ete analysee via SHAP, PDP et ICE. SHAP (SHapley Additive exPlanations) est une methode basee sur la theorie des valeurs de Shapley (theorie des jeux) qui decompose toute prediction en contributions additives :
 
 $$f(x) = \phi_0 + \sum_{j=1}^{p} \phi_j$$
 
-ou $\phi_0$ est la valeur de base et $\phi_j$ la contribution de la variable $j$. Les PDP donnent l'effet moyen d'une variable sur la prediction, tandis que les courbes ICE montrent la variabilite de cet effet d'un individu a l'autre.
+ici $\phi_0$ est la valeur de base (esperance de la sortie) et $\phi_j$ represente la contribution attribuee a la variable $j$ pour l'observation $x$. Les proprietes des valeurs de Shapley (additivite, equite) assurent une decomposition cohérente; `TreeExplainer` permet un calcul efficace pour les modeles d'arbres.
+
+Interprétation pratique :
+- $\phi_j>0$ indique que la variable $j$ augmente la prediction pour cette observation ; $\phi_j<0$ indique qu'elle la diminue.
+- L'importance globale d'une variable se mesure souvent par $\mathbb{E}[|\phi_j|]$ (moyenne des contributions absolues).
+- Les representations visuelles (beeswarm, heatmap, waterfall) aident a lire la direction et l'amplitude des effets, tandis que les PDP montrent l'effet marginal moyen et les ICE les variations individuelles.
+
+Limites :
+- SHAP traduit des relations statistiques, pas automatiquement de la causalité; attention aux variables derivees (ex. TPI) susceptibles d'encoder de l'information proche de la cible.
+- La presence de fortes collinearites affecte la repartition des contributions entre variables ; l'interprétation doit tenir compte de la redondance.
+- Les valeurs SHAP dans ce projet sont calculees sur des features normalisees (MinMax) ; pour interpréter en mm/r, de-normaliser la sortie est necessaire.
+
+PDP/ICE complementent SHAP : PDP donne l'effet moyen attendu d'une variable, ICE montre comment cet effet varie d'un individu a l'autre.
 
 ## 3. Resultats
 
@@ -109,20 +121,37 @@ Dans le detail, la comparaison du split 0.70/0.10/0.20 montre que le RVM atteint
 ### 3.3. Explicabilite du Gradient Boosting
 Le modele Gradient Boosting sur le split 80/20 a ete choisi pour l'analyse SHAP, PDP et ICE. Les resultats internes montrent que TPI domine largement l'importance moyenne absolue, suivi de T/D3(MT), tandis que les autres variables contribuent tres peu dans ce cadre.
 
-![Importance globale SHAP](../Internship_Research/AI9_SHAP_GB_80_20/images/shap_summary_bar_test.png)
+![Importance globale SHAP](../AI9_SHAP_GB_80_20/images/shap_summary_bar_test.png)
 
-Figure 5. Importance globale SHAP sur l'ensemble de test.
+Figure 5. Importance globale SHAP sur l'ensemble de test (moyenne des valeurs absolues des contributions). TPI domine nettement l'importance globale.
 
-Le resume quantitatif du dossier d'explicabilite indique que TPI porte environ 89.56 % de l'importance, contre 10.34 % pour T/D3(MT), et des contributions quasi nulles pour UEP, CRS, F/A(MF) et LEP. Le beeswarm SHAP confirme la directionnalite : des valeurs elevees de TPI tendent a diminuer la prediction, alors que des valeurs elevees de T/D3(MT) tendent a l'augmenter.
+![SHAP Beeswarm](../AI9_SHAP_GB_80_20/images/shap_summary_beeswarm_test.png)
 
-Les PDP et ICE apportent la meme lecture a l'echelle marginale et individuelle. Pour TPI, le PDP montre un effet moyen dominant, tandis que les courbes ICE restent relativement homogenes pour cette variable, ce qui signifie que son effet est stable sur la plupart des observations. A l'inverse, T/D3(MT) presente une heterogeneite plus forte entre individus, suggeree par une dispersion ICE plus importante.
+Figure 6. Beeswarm SHAP : direction et distribution des contributions par variable. La couleur indique la valeur de la feature (bleu = faible, rouge = élevée) ; la position horizontale indique l'impact sur la prédiction.
 
-![PDP TPI](../Internship_Research/AI10/images/pdp_TPI.png)
-![ICE TPI](../Internship_Research/AI10/images/ice_TPI.png)
+![Decision plot SHAP](../AI9_SHAP_GB_80_20/images/shap_decision_test.png)
 
-Figure 6. Effet moyen et effet individuel de TPI dans l'analyse PDP/ICE.
+Figure 7. Decision plot SHAP : trajectoires cumulées des contributions par feature pour les observations test. L'ouverture importante au niveau de TPI montre son effet discriminant.
 
-Ces resultats sont importants d'un point de vue metier. Ils signifient que le modele apprend principalement une relation monotone entre un indice de difficulte et le PR, avec un effet secondaire de couple normalise. Ils montrent aussi que certaines variables, bien qu'utiles physiquement pour la stabilite du front, ont peu d'influence sur la prediction du PR dans ce modele particulier.
+![SHAP Heatmap](../AI9_SHAP_GB_80_20/images/shap_heatmap_test.png)
+
+Figure 8. Heatmap des contributions SHAP (observations × variables) : met en évidence les sous-populations et les motifs récurrents de contributions.
+
+![Waterfall SHAP (mediane)](../AI9_SHAP_GB_80_20/images/shap_waterfall_median_abs_error_test.png)
+
+Figure 9. Waterfall SHAP pour une observation représentative (erreur absolue médiane) : décomposition additive de la prédiction en contributions par variable.
+
+Le résumé quantitatif du dossier d'explicabilité indique que TPI porte environ 89.56 % de l'importance, contre 10.34 % pour T/D3(MT), et des contributions quasi nulles pour UEP, CRS, F/A(MF) et LEP. Le beeswarm (Figure 6) confirme la directionnalité : des valeurs élevées de TPI tendent à diminuer la prédiction, tandis que des valeurs élevées de T/D3(MT) tendent à l'augmenter.
+
+La Figure 7 (decision plot) montre comment l'application séquentielle des contributions sépare les observations ; TPI crée l'écartement le plus important entre trajectoires. La heatmap (Figure 8) illustre la répartition spatiale des contributions et met en évidence des groupes d'observations où certaines variables ont des effets opposés.
+
+La Figure 9 (waterfall) permet d'expliquer localement une prédiction représentative : elle montre quelles variables poussent la prédiction vers le haut ou vers le bas pour cette observation.
+
+Les PDP et ICE (Figures 6 + fichiers PDP/ICE) confirment la même lecture à l'échelle marginale et individuelle : pour TPI, le PDP montre un effet moyen dominant, tandis que les courbes ICE restent relativement homogènes pour cette variable (effet stable). À l'inverse, T/D3(MT) présente une hétérogénéité plus marquée entre individus, suggérée par la dispersion ICE.
+
+Ces figures SHAP sont calculées sur les variables normalisées (MinMax) ; pour exprimer les contributions en mm/r, il faut appliquer l'inverse de la normalisation sur la sortie.
+
+Ces résultats sont importants d'un point de vue métier. Ils signifient que le modèle apprend principalement une relation monotone entre un indice de difficulté (TPI) et le PR, avec un effet secondaire de couple normalisé. Ils montrent aussi que certaines variables, bien qu'utiles physiquement pour la stabilité du front, ont peu d'influence sur la prédiction du PR dans ce modèle particulier.
 
 ## 4. Discussion
 Les resultats experimentaux confirment que la prediction du PR depend d'un petit nombre de variables dominantes. La relation positive entre AR et PR et la relation negative entre les indices de difficulte et PR sont cohérentes avec la physique du tunnelier. D'un point de vue algorithmique, cela explique pourquoi les modeles non lineaires, en particulier les methodes a noyau et le boosting, surpassent une regression lineaire simple.

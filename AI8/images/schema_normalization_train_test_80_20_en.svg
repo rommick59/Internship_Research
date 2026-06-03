@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="650" viewBox="0 0 2400 650">
+  <style>
+    .title { font: 28px sans-serif; text-anchor: middle; }
+    .box { fill: none; stroke: #000; stroke-width:6px; }
+    .label { font: 20px sans-serif; text-anchor: middle; }
+    .small { font: 16px sans-serif; text-anchor: middle; }
+    .note { font: 18px sans-serif; }
+    .arrow { stroke:#000; stroke-width:4px; fill:none; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#000" />
+    </marker>
+  </defs>
+
+  <text x="1200" y="36" class="title">AI8 — Normalization + ML Scheme (80% TRAIN, 20% TEST)</text>
+
+  <!-- Raw dataset box -->
+  <rect x="60" y="140" width="420" height="160" class="box" rx="4" ry="4" />
+  <text x="270" y="210" class="label">Raw dataset</text>
+  <text x="270" y="240" class="small">(TBM_data_cleaned.csv)</text>
+
+  <!-- Split arrows to train/test -->
+  <path d="M 480 200 L 620 160" class="arrow" />
+  <path d="M 480 240 L 620 320" class="arrow" />
+
+  <!-- Train box -->
+  <rect x="620" y="100" width="420" height="120" class="box" rx="4" ry="4" />
+  <text x="830" y="160" class="label">Split 80%\nTRAIN</text>
+
+  <!-- Test box -->
+  <rect x="620" y="280" width="420" height="120" class="box" rx="4" ry="4" />
+  <text x="830" y="340" class="label">Split 20%\nTEST</text>
+
+  <!-- Fit normalization on train -->
+  <path d="M 1040 160 L 1220 160" class="arrow" />
+  <rect x="1220" y="90" width="420" height="140" class="box" rx="4" ry="4" />
+  <text x="1430" y="150" class="label">Fit normalization\nON TRAIN</text>
+
+  <!-- Normalize TRAIN and Train ML -->
+  <path d="M 1640 150 L 1840 150" class="arrow" />
+  <rect x="1840" y="80" width="520" height="160" class="box" rx="4" ry="4" />
+  <text x="2100" y="120" class="label">Normalize TRAIN\n(min-max + imputation)</text>
+  <path d="M 2100 240 L 2100 270" class="arrow" />
+  <text x="2100" y="305" class="small">Train ML on TRAIN</text>
+
+  <!-- Normalize TEST with TRAIN scaler and Test ML -->
+  <path d="M 1040 320 L 1840 320" class="arrow" />
+  <rect x="1840" y="260" width="520" height="160" class="box" rx="4" ry="4" />
+  <text x="2100" y="300" class="label">Normalize TEST\n(with TRAIN scaler)</text>
+  <path d="M 2100 420 L 2100 450" class="arrow" />
+  <text x="2100" y="480" class="small">Test ML on TEST</text>
+
+  <!-- Note in center -->
+  <text x="1330" y="420" class="note">Same normalization (parameters learned on TRAIN) → applied to TEST</text>
+
+  <!-- Small legend/arrows near top right -->
+  <rect x="1840" y="500" width="520" height="110" class="box" rx="4" ry="4" />
+  <text x="2100" y="560" class="small">(Optional) Archive scalers, splits, models and SHAP files</text>
+
+</svg>

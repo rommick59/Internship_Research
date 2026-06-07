@@ -9,6 +9,9 @@ Outputs:
 - Internship_Research/AI8/images/ranking_80_20_train.png
 - Internship_Research/AI8/images/ranking_80_20_test.png
 - Internship_Research/AI8/images/ranking_80_20_gap.png
+- Internship_Research/AI8/images/ranking_80_20_train_<metric>.png
+- Internship_Research/AI8/images/ranking_80_20_test_<metric>.png
+- Internship_Research/AI8/images/ranking_80_20_gap_<metric>.png
 
 Run (PowerShell):
     c:/Users/siame/Desktop/Stage/.venv/Scripts/python.exe Internship_Research/AI8/ranking_diagrams_80_20.py
@@ -121,6 +124,15 @@ def plot_barh(ax, series: pd.Series, title: str, better: str) -> None:
     ax.grid(axis="x", linestyle=":", alpha=0.4)
 
 
+def save_barh(series: pd.Series, title: str, better: str, out: Path, dpi: int = 200) -> Path:
+    fig, ax = plt.subplots(figsize=(6, 4.5), constrained_layout=True)
+    plot_barh(ax, series, title, better=better)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=dpi)
+    plt.close(fig)
+    return out
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="AI8 ranking + diagrams for split 80/20")
     p.add_argument("--ai-dir", type=Path, default=Path("Internship_Research/AI8"))
@@ -140,6 +152,7 @@ def main() -> int:
 
     rankings.to_csv(args.out_rankings_csv, index=False)
     save_rankings_md(rankings, args.out_rankings_md)
+    saved_figures: list[Path] = []
 
     train_key = pd.DataFrame(
         {
@@ -157,6 +170,29 @@ def main() -> int:
     out_train = args.out_dir_images / "ranking_80_20_train.png"
     fig.savefig(out_train, dpi=200)
     plt.close(fig)
+    saved_figures.append(out_train)
+    saved_figures.extend(
+        [
+            save_barh(
+                train_key["train_r2"],
+                "TRAIN R² (higher is better)",
+                "higher",
+                args.out_dir_images / "ranking_80_20_train_r2.png",
+            ),
+            save_barh(
+                train_key["train_rmse"],
+                "TRAIN RMSE (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_train_rmse.png",
+            ),
+            save_barh(
+                train_key["train_mae"],
+                "TRAIN MAE (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_train_mae.png",
+            ),
+        ]
+    )
 
     test_key = pd.DataFrame(
         {
@@ -174,6 +210,29 @@ def main() -> int:
     out_test = args.out_dir_images / "ranking_80_20_test.png"
     fig.savefig(out_test, dpi=200)
     plt.close(fig)
+    saved_figures.append(out_test)
+    saved_figures.extend(
+        [
+            save_barh(
+                test_key["test_r2"],
+                "TEST R² (higher is better)",
+                "higher",
+                args.out_dir_images / "ranking_80_20_test_r2.png",
+            ),
+            save_barh(
+                test_key["test_rmse"],
+                "TEST RMSE (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_test_rmse.png",
+            ),
+            save_barh(
+                test_key["test_mae"],
+                "TEST MAE (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_test_mae.png",
+            ),
+        ]
+    )
 
     gap = pd.DataFrame(
         {
@@ -189,14 +248,30 @@ def main() -> int:
     out_gap = args.out_dir_images / "ranking_80_20_gap.png"
     fig.savefig(out_gap, dpi=200)
     plt.close(fig)
+    saved_figures.append(out_gap)
+    saved_figures.extend(
+        [
+            save_barh(
+                gap["rmse_gap"],
+                "RMSE gap (TEST - TRAIN) (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_gap_rmse.png",
+            ),
+            save_barh(
+                gap["mae_gap"],
+                "MAE gap (TEST - TRAIN) (lower is better)",
+                "lower",
+                args.out_dir_images / "ranking_80_20_gap_mae.png",
+            ),
+        ]
+    )
 
     print("Saved rankings:")
     print("-", args.out_rankings_csv)
     print("-", args.out_rankings_md)
     print("Saved figures:")
-    print("-", out_train)
-    print("-", out_test)
-    print("-", out_gap)
+    for path in saved_figures:
+        print("-", path)
 
     return 0
 

@@ -28,6 +28,7 @@ def main() -> int:
     run([sys.executable, str(AI8_DIR / "plot_vaf_ranking.py")])
     run([sys.executable, str(AI8_DIR / "cross_validation_train_only_80_20.py")])
     run([sys.executable, str(AI8_DIR / "residual_error_plots_test_80_20.py")])
+    run([sys.executable, str(AI8_DIR / "predicted_vs_measured_test_80_20.py")])
     run([sys.executable, str(AI8_DIR / "normalization_schema_80_20.py")])
     run([sys.executable, str(AI8_DIR / "ranking_diagrams_80_20.py")])
 
